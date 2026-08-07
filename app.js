@@ -16,7 +16,7 @@ const SESSIONS = {
     ],
     B: [
         { id: "rot_b", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "2 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
-        { id: "hipthrust", name: "Hip thrust", group: "Bilspieren | Hamstrings", weight: 40, unit: "kg", rung: 0, rest: 120, cue: "Kin naar borst, ribben omlaag." },
+        { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 0, unit: "kg", rung: 0, rest: 120, cue: "Pad net onder je heupbotten. Buigen vanuit je heupen, rug neutraal. Stop bij een rechte lijn." },
         { id: "arnold", name: "Arnold press", group: "Schouders | Triceps", weight: 12, unit: "kg", rung: 2, rest: 90, cue: "3x10 eerst schoon afmaken." },
         { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg", rung: 3, rest: 75, cue: "Ellebogen achter je torso." },
         { id: "split", name: "Split squat", group: "Quadriceps | Bilspieren", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: per been tellen." },
