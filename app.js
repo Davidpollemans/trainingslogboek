@@ -123,6 +123,12 @@ export default function Trainingslogboek() {
         if (result === "completed" && data.settings.restTimer && item.rest)
             setTimer({ name: item.name, left: item.rest });
     };
+    const undoExercise = item => { const before = snapshots[item.id]; if (before && !item.fixed) {
+        const rung = LADDER.indexOf(before.target);
+        setExercise(item.id, rung >= 0 ? { rung, weight: before.weight, unit: before.unit } : { weight: before.weight, unit: before.unit });
+    } markExercise(item, null); setError(""); };
+    const stayOnRung = item => { if (completed[item.id])
+        return; markExercise(item, "not_completed", snapOf(item, current[item.id] || {})); };
     const advance = item => { if (completed[item.id]) {
         setError("Deze oefening is al afgerond voor deze sessie.");
         return;
@@ -252,19 +258,19 @@ export default function Trainingslogboek() {
                         React.createElement("div", { style: { padding: 13 } }, item.fixed ? React.createElement(React.Fragment, null,
                             React.createElement("div", { style: { fontSize: 22, fontWeight: 800 } }, item.fixed),
                             React.createElement("div", { style: { color: C.muted, fontSize: 12, margin: "7px 0 12px" } }, item.cue),
-                            React.createElement("button", { className: "tap", onClick: () => markExercise(item, done ? null : "completed"), style: { ...ui.primary, width: "100%", background: done ? C.green : C.ochre } }, done ? "Afgerond" : "Markeer als afgerond")) : React.createElement(React.Fragment, null,
+                            React.createElement("button", { className: "tap", onClick: () => done ? undoExercise(item) : markExercise(item, "completed"), style: done ? { ...ui.secondary, width: "100%", color: C.muted } : { ...ui.primary, width: "100%" } }, done ? "Afgerond \u2014 tik om te wijzigen" : "Markeer als afgerond")) : React.createElement(React.Fragment, null,
                             React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" } },
                                 React.createElement("strong", { style: { fontSize: 26, letterSpacing: "-0.02em" } }, LADDER[st.rung]),
                                 React.createElement("span", { style: { color: C.line } }, "|"),
                                 React.createElement("label", { htmlFor: `weight-${item.id}`, style: { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" } }, `Gewicht voor ${item.name}`),
-                                React.createElement("input", { id: `weight-${item.id}`, inputMode: "decimal", value: st.weight ?? "", placeholder: "\u2014", onChange: e => setExercise(item.id, { weight: e.target.value }), onBlur: () => setExercise(item.id, { weight: parseNumber(st.weight) }), style: { ...ui.input, width: 62, minHeight: 34, padding: "4px 7px", fontSize: 17, background: "transparent", borderColor: C.line } }),
-                                React.createElement("select", { "aria-label": `Eenheid voor ${item.name}`, value: st.unit, onChange: e => setExercise(item.id, { unit: e.target.value }), style: { ...ui.input, width: "auto", minHeight: 34, padding: "4px 4px", fontSize: 13, background: "transparent", border: 0, color: C.muted } },
+                                React.createElement("input", { id: `weight-${item.id}`, inputMode: "decimal", value: st.weight ?? "", placeholder: "\u2014", onChange: e => setExercise(item.id, { weight: e.target.value }), onBlur: () => setExercise(item.id, { weight: parseNumber(st.weight) }), style: { ...ui.input, width: 76, minHeight: 44, padding: "6px 8px", fontSize: 17, background: "transparent", borderColor: C.line } }),
+                                React.createElement("select", { "aria-label": `Eenheid voor ${item.name}`, value: st.unit, onChange: e => setExercise(item.id, { unit: e.target.value }), style: { ...ui.input, width: "auto", minHeight: 44, padding: "0 6px", fontSize: 14, background: "transparent", border: 0, color: C.muted } },
                                     React.createElement("option", { value: "kg" }, "kg"),
                                     React.createElement("option", { value: "kg per kant" }, "kg/kant"),
                                     React.createElement("option", { value: "machine" }, "machine"))),
-                            React.createElement("div", { role: "img", "aria-label": `Trede ${st.rung + 1} van ${LADDER.length}: ${LADDER[st.rung]}`, style: { display: "flex", gap: 3, margin: "13px 0 7px" } }, LADDER.map((x, i) => React.createElement("span", { key: x, style: { flex: 1, height: 3, borderRadius: 2, background: i === st.rung ? C.ochre : i < st.rung ? C.ochreDim : C.line } }))),
+                            React.createElement("div", { style: { display: "flex", gap: 4, margin: "0 0 -4px" } }, LADDER.map((x, i) => React.createElement("button", { key: x, className: "tap", title: `Zet op ${x}`, "aria-label": `Zet ${item.name} op ${x}`, "aria-pressed": i === st.rung, onClick: () => setExercise(item.id, { rung: i }), style: { flex: 1, minHeight: 44, height: 44, padding: 0, border: 0, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" } }, React.createElement("span", { style: { width: "100%", height: 3, borderRadius: 2, background: i === st.rung ? C.ochre : i < st.rung ? C.ochreDim : C.line } })))),
                             React.createElement("div", { style: { color: C.muted, fontSize: 11.5, lineHeight: 1.5, marginBottom: 12 } },
-                                `trede ${st.rung + 1} van ${LADDER.length} \u00b7 rust ${item.rest} sec`,
+                                `${LADDER[st.rung]} \u00b7 trede ${st.rung + 1} van ${LADDER.length} \u00b7 rust ${item.rest} sec`,
                                 item.cue && ` \u00b7 ${item.cue.toLowerCase()}`),
                             newWeightFor === item.id ? React.createElement("div", { style: { background: C.cardHi, padding: 11, borderRadius: 8 } },
                                 React.createElement("label", { htmlFor: `new-${item.id}`, style: ui.label },
@@ -273,10 +279,9 @@ export default function Trainingslogboek() {
                                 React.createElement("input", { id: `new-${item.id}`, autoFocus: true, inputMode: "decimal", value: newWeight, onChange: e => setNewWeight(e.target.value), style: ui.input }),
                                 React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 8 } },
                                     React.createElement("button", { className: "tap", onClick: () => confirmNewWeight(item), style: { ...ui.primary, flex: 1 } }, "Start op 3x8"),
-                                    React.createElement("button", { className: "tap", onClick: () => setNewWeightFor(null), style: ui.secondary }, "Annuleren"))) : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 50px", gap: 8 } },
-                                React.createElement("button", { className: "tap", onClick: () => advance(item), style: { ...ui.primary, background: done ? C.green : C.ochre } }, done ? "Afgerond" : st.rung === LADDER.length - 1 ? "Gehaald" : "Gehaald"),
-                                React.createElement("button", { className: "tap", "aria-label": `Stap terug bij ${item.name}`, disabled: st.rung === 0, onClick: () => setExercise(item.id, { rung: st.rung - 1 }), style: { ...ui.secondary, padding: 0, color: st.rung ? C.bone : C.line } }, "\u21B6")),
-                            !done && React.createElement("button", { className: "tap", onClick: () => markExercise(item, "not_completed"), style: { background: "none", border: 0, color: C.muted, minHeight: 44, width: "100%", marginTop: 4 } }, "Niet gehaald, wel afronden"))));
+                                    React.createElement("button", { className: "tap", onClick: () => setNewWeightFor(null), style: ui.secondary }, "Annuleren"))) : done ? React.createElement("button", { className: "tap", onClick: () => undoExercise(item), style: { ...ui.secondary, width: "100%", color: C.muted } }, done === "completed" ? "Gehaald \u2014 tik om te wijzigen" : "Blijft staan \u2014 tik om te wijzigen") : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 8 } },
+                                React.createElement("button", { className: "tap", onClick: () => advance(item), style: { ...ui.primary } }, "Gehaald"),
+                                React.createElement("button", { className: "tap", onClick: () => stayOnRung(item), style: { ...ui.secondary, minHeight: 46 } }, "Nog niet")))));
                 }),
                 React.createElement("button", { className: "tap", onClick: finishSession, style: { ...ui.primary, width: "100%", minHeight: 54 } },
                     "Sessie ",
