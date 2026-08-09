@@ -3,7 +3,7 @@
    - overige eigen bestanden: stale-while-revalidate
    - externe modules (esm.sh): cache-first, want die versies staan vast
    - fallback naar index.html ALLEEN voor navigatieverzoeken            */
-const VERSION = "v3";
+const VERSION = "v4";
 const SHELL = `shell-${VERSION}`;
 const VENDOR = `vendor-${VERSION}`;
 const CORE = ["./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon.svg",

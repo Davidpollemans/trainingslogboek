@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "https://esm.sh/react@19.1.1";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "https://esm.sh/recharts@3.1.2?external=react,react-dom";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceLine, ResponsiveContainer } from "https://esm.sh/recharts@3.1.2?deps=react@19.1.1,react-dom@19.1.1";
 const VERSION = 2;
 const KEY = "trainer:state";
 const LADDER = ["3x8", "4x8", "3x10", "4x10", "3x12", "4x12"];
