@@ -57,7 +57,11 @@ const bedHours = (bed, up) => { const b = hhmm(bed), u = hhmm(up); if (b === nul
     d += 24; return Math.round(d * 100) / 100; };
 const efficiency = e => { const inBed = bedHours(e.bed, e.up); if (!inBed || !e.slept)
     return null; return Math.round(e.slept / inBed * 1000) / 10; };
-const sleepWeeks = list => { const m = {}; list.forEach(e => { const k = weekKey(new Date(e.d + "T12:00:00")); (m[k] = m[k] || []).push(e); }); return Object.keys(m).sort().map(k => { const es = m[k]; const avg = f => { const v = es.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; return { key: k, n: es.length, inBed: avg(e => bedHours(e.bed, e.up)), slept: avg(e => e.slept), eff: avg(e => efficiency(e)), quality: avg(e => e.quality), morning: avg(e => e.morning) }; }); };
+const sleepWeeks = (list, startStr) => { const start = new Date((startStr || (list[0] && list[0].d) || new Date().toISOString().slice(0, 10)) + "T12:00:00"); const m = {}; list.forEach(e => { const idx = Math.floor((new Date(e.d + "T12:00:00") - start) / 6048e5); if (idx >= 0)
+    (m[idx] = m[idx] || []).push(e); }); return Object.keys(m).map(Number).sort((a, b) => a - b).map(idx => { const es = m[idx]; const avg = f => { const v = es.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; const from = new Date(start.getTime() + idx * 6048e5); return { idx, nr: idx + 1, from: from.toISOString().slice(0, 10), n: es.length, inBed: avg(e => bedHours(e.bed, e.up)), slept: avg(e => e.slept), eff: avg(e => efficiency(e)), quality: avg(e => e.quality) }; }); };
+const sleepWeekNow = startStr => { if (!startStr)
+    return null; const start = new Date(startStr + "T12:00:00"); const today = new Date(); today.setHours(12, 0, 0, 0); const days = Math.floor((today - start) / 864e5); if (days < 0)
+    return { nr: 0, days, start }; return { nr: Math.floor(days / 7) + 1, days, start, dayInWeek: days % 7 + 1 }; };
 const phaseInfo = p => {
     if (!p || !p.start)
         return null;
@@ -72,7 +76,7 @@ const phaseInfo = p => {
     const week = Math.min(weeks, Math.max(1, Math.floor(daysDone / 7) + 1));
     return { name: p.name || "Fase", start, end, weeks, week, daysLeft, totalDays, pct: Math.min(100, Math.max(0, daysDone / totalDays * 100)), done: daysDone >= totalDays, started: daysDone >= 0 };
 };
-const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 } } });
+const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 }, sleepStart: "2026-08-09" } });
 const storage = {
     async get(key) { if (window.storage?.get)
         return window.storage.get(key); const value = localStorage.getItem(key); return value ? { value } : null; },
@@ -374,6 +378,12 @@ export default function Trainingslogboek() {
                             React.createElement(ReferenceLine, { y: data.settings.weightGoal, stroke: C.green }),
                             React.createElement(Line, { type: "monotone", dataKey: "kg", stroke: C.ochre, strokeWidth: 3 }))))),
             tab === "slaap" && React.createElement(React.Fragment, null,
+                (() => { const w = sleepWeekNow(data.settings.sleepStart); if (!w)
+                    return null; return React.createElement("section", { style: { ...ui.panel, paddingTop: 12, paddingBottom: 12 } },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 } },
+                        React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: C.bone } }, w.nr < 1 ? "Slaaptraject begint nog" : `Slaaptraject \u00b7 week ${w.nr}`),
+                        React.createElement("span", { style: { fontSize: 12, color: C.muted } }, w.nr < 1 ? `over ${-w.days} ${-w.days === 1 ? "dag" : "dagen"}` : `dag ${w.dayInWeek} van 7`)),
+                    React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 5 } }, `gestart op ${fmt(data.settings.sleepStart)} \u00b7 ${Math.max(0, w.days + 1)} dagen onderweg`)); })(),
                 (() => { const f = sleepForm; const inBed = bedHours(f.bed, f.up); const slept = parseNumber(f.slept); const eff = inBed && slept ? Math.round(slept / inBed * 1000) / 10 : null; const set = (k, v) => setSleepForm(p => ({ ...p, [k]: v })); return React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Vannacht"),
                     React.createElement("label", { htmlFor: "sl-d", style: ui.label }, "Datum (ochtend na de nacht)"),
@@ -399,16 +409,16 @@ export default function Trainingslogboek() {
                     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, gap: 10 } },
                         React.createElement("div", { style: { fontSize: 12, color: C.muted } }, inBed ? `${nl(inBed)} uur in bed` : "vul je tijden in"),
                         React.createElement("button", { className: "tap", onClick: saveSleep, style: ui.primary }, "Opslaan"))); })(),
-                (() => { const ws = sleepWeeks(data.sleep || []); const thisWeek = weekKey(new Date()); if (!ws.length)
+                (() => { const ws = sleepWeeks(data.sleep || [], data.settings.sleepStart); const nu = sleepWeekNow(data.settings.sleepStart); if (!ws.length)
                     return React.createElement("section", { style: ui.panel },
                         React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: C.bone, marginTop: 0 } }, "Nog geen slaapgegevens"),
                         React.createElement("p", { style: { fontSize: 12.5, color: C.muted, lineHeight: 1.6, margin: 0 } }, "Vul elke ochtend je nacht in. Aan het eind van je eerste volle week verschijnt hier je gemiddelde slaapefficientie \u2014 het getal dat je meeneemt naar je behandelaar.")); return React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: C.bone, marginTop: 0 } }, "Per week"),
-                    ws.slice().reverse().map((w, i) => { const nr = ws.length - i; const lopend = w.key === thisWeek; const compleet = !lopend || w.n >= 7; return React.createElement("div", { key: w.key, style: { padding: "11px 0", borderBottom: `1px solid ${C.lineSoft}` } },
+                    ws.slice().reverse().map(w => { const nr = w.nr; const lopend = nu && nu.nr === nr; const compleet = !lopend || w.n >= 7; return React.createElement("div", { key: w.idx, style: { padding: "11px 0", borderBottom: `1px solid ${C.lineSoft}` } },
                         React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 } },
                             React.createElement("span", { style: { fontSize: 13, color: C.bone } }, `Week ${nr}`),
                             compleet ? React.createElement("strong", { style: { fontSize: 20, fontWeight: 600, color: w.eff >= 85 ? C.green : C.bone } }, w.eff ? `${nl(w.eff)}%` : "\u2014") : React.createElement("span", { style: { fontSize: 12, color: C.muted } }, `nog ${7 - w.n} ${7 - w.n === 1 ? "nacht" : "nachten"}`)),
-                        React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 3 } }, compleet ? `vanaf ${fmt(w.key)} \u00b7 ${nl(w.inBed)} uur in bed \u00b7 ${nl(w.slept)} uur slaap` : `vanaf ${fmt(w.key)} \u00b7 ${w.n} van 7 nachten ingevuld`)); }),
+                        React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 3 } }, compleet ? `vanaf ${fmt(w.from)} \u00b7 ${nl(w.inBed)} uur in bed \u00b7 ${nl(w.slept)} uur slaap` : `vanaf ${fmt(w.from)} \u00b7 ${w.n} van 7 nachten ingevuld`)); }),
                     React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, marginBottom: 0, marginTop: 12 } }, "Je efficientie verschijnt pas als de week vol is. Tussentijds op je cijfers kijken helpt je slaap niet. Wat je met het weekgetal doet, bepaalt je behandelaar \u2014 de app rekent alleen.")); })(),
                 (data.sleep || []).length > 0 && React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Laatste nachten"),
@@ -458,6 +468,8 @@ export default function Trainingslogboek() {
                     React.createElement("input", { id: "goal-weight", inputMode: "decimal", value: data.settings.weightGoal, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, weightGoal: parseNumber(e.target.value) ?? "" } })), style: ui.input }),
                     React.createElement("label", { htmlFor: "goal-gym", style: { ...ui.label, marginTop: 12 } }, "Sportschoolsessies per week"),
                     React.createElement("input", { id: "goal-gym", type: "number", min: "1", max: "7", value: data.settings.weeklyGymGoal, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, weeklyGymGoal: Number(e.target.value) } })), style: ui.input }),
+                    React.createElement("label", { htmlFor: "sleep-start", style: { ...ui.label, marginTop: 16 } }, "Start slaaptraject"),
+                    React.createElement("input", { id: "sleep-start", type: "date", value: data.settings.sleepStart || "", onChange: e => patch(d => ({ ...d, settings: { ...d.settings, sleepStart: e.target.value } })), style: ui.input }),
                     React.createElement("label", { htmlFor: "phase-name", style: { ...ui.label, marginTop: 16 } }, "Huidige fase"),
                     React.createElement("input", { id: "phase-name", value: (data.settings.phase || {}).name || "", placeholder: "Cut", onChange: e => patch(d => ({ ...d, settings: { ...d.settings, phase: { ...(d.settings.phase || {}), name: e.target.value } } })), style: ui.input }),
                     React.createElement("label", { htmlFor: "phase-start", style: { ...ui.label, marginTop: 12 } }, "Startdatum"),
