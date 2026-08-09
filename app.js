@@ -82,9 +82,9 @@ const storage = {
 function migrate(raw) {
     if (!raw)
         return newState();
-    if (raw.version === VERSION)
-        return { ...newState(), ...raw };
     const exercises = { ...defaultExercises(), ...(raw.exercises || raw.ex || {}) };
+    if (raw.version === VERSION)
+        return { ...newState(), ...raw, exercises, baseline: raw.baseline && raw.baseline.date ? { date: raw.baseline.date, exercises: { ...defaultExercises(), ...(raw.baseline.exercises || raw.baseline.ex || {}) } } : { date: new Date().toISOString(), exercises } };
     return { ...newState(), ...raw, version: VERSION, exercises, baseline: raw.baseline ? { date: raw.baseline.date, exercises: raw.baseline.exercises || raw.baseline.ex || exercises } : { date: new Date().toISOString(), exercises }, history: raw.history || [] };
 }
 function download(name, text, type) { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); }
@@ -140,7 +140,7 @@ export default function Trainingslogboek() {
     const performed = SESSIONS[session].filter(i => completed[i.id]).length;
     const weeklyAvgs = useMemo(() => { const m = {}; data.weights.forEach(w => { var _a; return ((m[_a = weekKey(new Date(`${w.d}T12:00:00`))] || (m[_a] = [])).push(w.kg)); }); return Object.keys(m).sort().map(key => ({ key, week: fmt(key), kg: m[key].reduce((a, b) => a + b, 0) / m[key].length })); }, [data.weights]);
     const weekBars = useMemo(() => Object.keys(data.weeks).sort().slice(-8).map(key => ({ week: fmt(key), sport: SLOTS.filter(s => s.gym && data.weeks[key][s.id]).length, vecht: SLOTS.filter(s => !s.gym && data.weeks[key][s.id]).length })), [data.weeks]);
-    const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const b = data.baseline.exercises[item.id] || current[item.id]; const n = current[item.id] || b; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${LADDER[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${LADDER[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * LADDER.length) }; }), [data.baseline, current]);
+    const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const def = { weight: item.weight, unit: item.unit, rung: item.rung }; const b = (data.baseline && data.baseline.exercises && data.baseline.exercises[item.id]) || current[item.id] || def; const n = current[item.id] || b || def; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${LADDER[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${LADDER[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * LADDER.length) }; }), [data.baseline, current]);
     const totalMoments = progress.reduce((a, p) => a + p.moments, 0);
     const weeksIn = Math.max(0, Math.floor((Date.now() - new Date(data.baseline.date).getTime()) / 6048e5));
     const setExercise = (id, values) => patch(d => ({ ...d, exercises: { ...d.exercises, [id]: { ...d.exercises[id], ...values } } }));
@@ -276,7 +276,7 @@ export default function Trainingslogboek() {
                         Math.round(performed / SESSIONS[session].length * 100),
                         "%")),
                 SESSIONS[session].map(item => {
-                    const st = current[item.id];
+                    const st = current[item.id] || { weight: item.weight, unit: item.unit, rung: item.rung };
                     const done = completed[item.id];
                     return React.createElement("article", { key: item.id, style: { ...ui.panel, padding: 0, overflow: "hidden", borderColor: done ? (done === "completed" ? C.green : C.ochreDim) : C.line, borderLeft: `4px solid ${done ? (done === "completed" ? C.green : C.ochreDim) : "transparent"}`, opacity: done ? .78 : 1 } },
                         React.createElement("div", { style: { padding: "13px 13px 0", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 } },
