@@ -3,25 +3,33 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 const VERSION = 2;
 const KEY = "trainer:state";
 const LADDER = ["3x8", "4x8", "3x10", "4x10", "3x12", "4x12"];
-const C = { ink: "#16150F", card: "#211F17", cardHi: "#2B2819", line: "#3C3826", ochre: "#E0A526", ochreDim: "#6E5722", bone: "#F2EDE0", muted: "#A9A28E", green: "#8DB567", red: "#D9786A" };
+const C = { ink: "#191811", card: "#232118", cardHi: "#2C2A1F", line: "#35322A", lineSoft: "#2A281F", ochre: "#D9A231", ochreDim: "#6B5524", ochreBg: "#2E2716", bone: "#EDE8DA", muted: "#96907E", green: "#8DB567", red: "#D9786A" };
 const SESSIONS = {
     A: [
-        { id: "rot_a", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "2 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
+        { id: "warm_a", name: "Warming-up", group: "Cardiovasculair", fixed: "5 min rustig", rest: 0, cue: "Loopband, roeier of crosstrainer. Daarna 1-2 lichte opwarmsets van je eerste zware oefening (tellen niet mee)." },
+        { id: "rot_a", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "3 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
         { id: "legpress", name: "Leg press", group: "Quadriceps | Hamstrings", weight: 60, unit: "kg", rung: 0, rest: 120 },
         { id: "chestpress", name: "Incline chest press", group: "Bovenkant borst | Triceps", weight: 20, unit: "kg per kant", rung: 2, rest: 90 },
         { id: "pulldown", name: "Convergent pull down", group: "Rug | Biceps", weight: 35, unit: "kg per kant", rung: 2, rest: 75, cue: "Beweging start in je schouders." },
+        { id: "sapd", name: "Straight arm pull down", group: "Brede rugspier", weight: 21, unit: "kg", rung: 0, rest: 60, cue: "Lats. Armen gestrekt, beweging uit je schouderbladen." },
         { id: "legcurl", name: "Leg curl", group: "Hamstrings", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: zoek je startgewicht." },
         { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 2, rest: 60 },
+        { id: "lateral_a", name: "Lateral raise", group: "Schouders (zijkant)", weight: 6, unit: "kg", rung: 0, rest: 45, cue: "Breedte. Licht gewicht, ellebogen leiden." },
+        { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 0, unit: "kg", rung: 0, rest: 60, cue: "Nieuw. Ellebogen tegen je zij, geen zwaai." },
+        { id: "calf_a", name: "Calf raise", group: "Kuiten", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Volledig omhoog, langzaam zakken." },
         { id: "plank", name: "Plank", group: "Rechte buikspieren", fixed: "3 x 40 sec", rest: 30 }
     ],
     B: [
-        { id: "rot_b", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "2 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
-        { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 0, unit: "kg", rung: 0, rest: 120, cue: "Pad net onder je heupbotten. Buigen vanuit je heupen, rug neutraal. Stop bij een rechte lijn." },
+        { id: "warm_b", name: "Warming-up", group: "Cardiovasculair", fixed: "5 min rustig", rest: 0, cue: "Loopband, roeier of crosstrainer. Daarna 1-2 lichte opwarmsets van je eerste zware oefening (tellen niet mee)." },
+        { id: "rot_b", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "3 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
+        { id: "split", name: "Split squat", group: "Quadriceps | Bilspieren", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: per been tellen." },
         { id: "arnold", name: "Arnold press", group: "Schouders | Triceps", weight: 12, unit: "kg", rung: 2, rest: 90, cue: "3x10 eerst schoon afmaken." },
         { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg", rung: 3, rest: 75, cue: "Ellebogen achter je torso." },
-        { id: "split", name: "Split squat", group: "Quadriceps | Bilspieren", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: per been tellen." },
-        { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60 },
+        { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 0, unit: "kg", rung: 0, rest: 90, cue: "Licht houden, geen zware hoofdoefening. Pad onder je heupbotten, stop bij een rechte lijn." },
         { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 6, unit: "kg", rung: 0, rest: 45 },
+        { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60 },
+        { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Licht gewicht, knijp je schouderbladen samen." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Volledig omhoog, langzaam zakken." },
         { id: "crunch", name: "Cable crunch", group: "Rechte buikspieren", weight: null, unit: "kg", rung: 0, rest: 45, cue: "Nieuw: buig vanuit je romp." }
     ]
 };
@@ -42,7 +50,29 @@ const parseNumber = v => { const n = Number(String(v).replace(",", ".")); return
 const nl = (v, d = 1) => v == null ? "-" : Number(v).toFixed(d).replace(".", ",");
 const allItems = () => [...SESSIONS.A, ...SESSIONS.B];
 const defaultExercises = () => Object.fromEntries(allItems().filter(x => !x.fixed).map(x => [x.id, { weight: x.weight, unit: x.unit, rung: x.rung }]));
-const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, restTimer: true } });
+const hhmm = t => { if (!t || !/^\d{1,2}:\d{2}$/.test(t))
+    return null; const [h, m] = t.split(":").map(Number); return h + m / 60; };
+const bedHours = (bed, up) => { const b = hhmm(bed), u = hhmm(up); if (b === null || u === null)
+    return null; let d = u - b; if (d <= 0)
+    d += 24; return Math.round(d * 100) / 100; };
+const efficiency = e => { const inBed = bedHours(e.bed, e.up); if (!inBed || !e.slept)
+    return null; return Math.round(e.slept / inBed * 1000) / 10; };
+const sleepWeeks = list => { const m = {}; list.forEach(e => { const k = weekKey(new Date(e.d + "T12:00:00")); (m[k] = m[k] || []).push(e); }); return Object.keys(m).sort().map(k => { const es = m[k]; const avg = f => { const v = es.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; return { key: k, n: es.length, inBed: avg(e => bedHours(e.bed, e.up)), slept: avg(e => e.slept), eff: avg(e => efficiency(e)), quality: avg(e => e.quality), morning: avg(e => e.morning) }; }); };
+const phaseInfo = p => {
+    if (!p || !p.start)
+        return null;
+    const start = new Date(p.start + "T12:00:00");
+    const weeks = Math.max(1, Number(p.weeks) || 8);
+    const end = new Date(start.getTime() + weeks * 7 * 864e5);
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+    const totalDays = weeks * 7;
+    const daysDone = Math.round((today - start) / 864e5);
+    const daysLeft = Math.max(0, totalDays - daysDone);
+    const week = Math.min(weeks, Math.max(1, Math.floor(daysDone / 7) + 1));
+    return { name: p.name || "Fase", start, end, weeks, week, daysLeft, totalDays, pct: Math.min(100, Math.max(0, daysDone / totalDays * 100)), done: daysDone >= totalDays, started: daysDone >= 0 };
+};
+const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 } } });
 const storage = {
     async get(key) { if (window.storage?.get)
         return window.storage.get(key); const value = localStorage.getItem(key); return value ? { value } : null; },
@@ -72,9 +102,9 @@ export default function Trainingslogboek() {
     const [toast, setToast] = useState("");
     const [weekOffset, setWeekOffset] = useState(0);
     const [kgInput, setKgInput] = useState("");
+    const [sleepForm, setSleepForm] = useState({ d: new Date().toISOString().slice(0, 10), bed: "23:00", up: "07:00", slept: "", quality: "", morning: "", note: "" });
     const [newWeightFor, setNewWeightFor] = useState(null);
     const [newWeight, setNewWeight] = useState("");
-    const [timer, setTimer] = useState(null);
     const [undo, setUndo] = useState(null);
     const fileInput = useRef(null);
     useEffect(() => { (async () => { try {
@@ -100,8 +130,6 @@ export default function Trainingslogboek() {
         setStatus("niet bewaard");
         setError("Opslaan is mislukt. Exporteer voor de zekerheid een back-up.");
     } }, 350); return () => clearTimeout(id); }, [data, loaded]);
-    useEffect(() => { if (!timer)
-        return; const id = setInterval(() => setTimer(t => !t || t.left <= 1 ? null : { ...t, left: t.left - 1 }), 1000); return () => clearInterval(id); }, [timer]);
     useEffect(() => { if ("serviceWorker" in navigator)
         navigator.serviceWorker.register("./sw.js").catch(() => { }); }, []);
     const patch = update => setData(d => typeof update === "function" ? update(d) : ({ ...d, ...update }));
@@ -120,8 +148,6 @@ export default function Trainingslogboek() {
     const markExercise = (item, result, snap) => {
         setCompleted(c => ({ ...c, [item.id]: result }));
         setSnapshots(p => result ? ({ ...p, [item.id]: snap || snapOf(item, current[item.id] || {}) }) : (() => { const q = { ...p }; delete q[item.id]; return q; })());
-        if (result === "completed" && data.settings.restTimer && item.rest)
-            setTimer({ name: item.name, left: item.rest });
     };
     const undoExercise = item => { const before = snapshots[item.id]; if (before && !item.fixed) {
         const rung = LADDER.indexOf(before.target);
@@ -166,6 +192,9 @@ export default function Trainingslogboek() {
         setUndo(null);
         setToast("Afronding ongedaan gemaakt");
     } };
+    const saveSleep = () => { const f = sleepForm; if (!f.d || !bedHours(f.bed, f.up))
+        return setError("Vul een geldige bedtijd en opsta-tijd in."); const slept = parseNumber(f.slept); if (slept === null || slept <= 0 || slept > 16)
+        return setError("Vul het aantal uren slaap in (bijvoorbeeld 6,5)."); const entry = { d: f.d, bed: f.bed, up: f.up, slept, quality: parseNumber(f.quality), morning: parseNumber(f.morning), note: (f.note || "").slice(0, 200) }; patch(d => ({ ...d, sleep: [...(d.sleep || []).filter(x => x.d !== entry.d), entry].sort((a, b) => a.d.localeCompare(b.d)) })); setError(""); setToast("Slaap opgeslagen"); };
     const addWeight = () => { const n = parseNumber(kgInput); if (n == null || n < 30 || n > 250) {
         setError("Voer een lichaamsgewicht tussen 30 en 250 kg in.");
         return;
@@ -201,11 +230,11 @@ export default function Trainingslogboek() {
     const copySummary = async () => { await navigator.clipboard.writeText(summary); setToast("Samenvatting gekopieerd"); };
     const font = '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     const ui = {
-        panel: { background: C.card, border: `1px solid ${C.line}`, borderRadius: 10, padding: 14, marginBottom: 12 },
+        panel: { background: C.card, border: `1px solid ${C.lineSoft}`, borderRadius: 12, padding: 15, marginBottom: 11 },
         label: { display: "block", fontSize: 11, color: C.muted, letterSpacing: ".08em", textTransform: "uppercase", marginBottom: 5 },
         input: { boxSizing: "border-box", width: "100%", minHeight: 44, background: C.cardHi, border: `1px solid ${C.line}`, borderRadius: 7, color: C.bone, font: `600 16px ${font}`, padding: "10px 11px" },
         primary: { minHeight: 46, background: C.ochre, color: C.ink, border: 0, borderRadius: 8, padding: "0 16px", font: `500 14px ${font}`, cursor: "pointer" },
-        secondary: { minHeight: 46, background: "transparent", color: C.bone, border: `1px solid ${C.line}`, borderRadius: 8, padding: "0 14px", font: `700 13px ${font}`, cursor: "pointer" }
+        secondary: { minHeight: 46, background: "transparent", color: C.bone, border: `1px solid ${C.line}`, borderRadius: 8, padding: "0 14px", font: `500 13.5px ${font}`, cursor: "pointer" }
     };
     if (!loaded)
         return React.createElement("div", { style: { background: C.ink, color: C.bone, minHeight: "100vh", padding: 24, fontFamily: font } }, "Trainingslogboek laden...");
@@ -213,30 +242,28 @@ export default function Trainingslogboek() {
         React.createElement("style", null, `*{box-sizing:border-box}button,input,select,textarea{font:inherit}.tap{touch-action:manipulation}.tap:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid ${C.ochre};outline-offset:2px}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}`),
         React.createElement("main", { style: { maxWidth: 540, margin: "0 auto" } },
             React.createElement("header", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 } },
-                React.createElement("h1", { style: { fontSize: 20, margin: 0 } }, "Trainingslogboek"),
+                React.createElement("h1", { style: { fontSize: 18, fontWeight: 600, letterSpacing: "-.01em", margin: 0 } }, "Trainingslogboek"),
                 React.createElement("span", { "aria-live": "polite", style: { fontSize: 11, color: status === "niet bewaard" ? C.red : C.muted, textTransform: "uppercase" } }, status)),
             error && React.createElement("div", { role: "alert", style: { ...ui.panel, borderColor: C.red, color: C.bone } },
                 React.createElement("strong", null, "Let op"),
                 React.createElement("div", { style: { marginTop: 4, fontSize: 13 } }, error),
                 React.createElement("button", { className: "tap", onClick: () => setError(""), style: { ...ui.secondary, minHeight: 40, marginTop: 10 } }, "Sluiten")),
-            timer && React.createElement("div", { role: "timer", style: { ...ui.panel, position: "sticky", top: 8, zIndex: 5, borderColor: C.ochre } },
-                React.createElement("div", { style: ui.label },
-                    "Rusttimer | ",
-                    timer.name),
-                React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
-                    React.createElement("strong", { style: { fontSize: 28, color: C.ochre } },
-                        Math.floor(timer.left / 60),
-                        ":",
-                        String(timer.left % 60).padStart(2, "0")),
-                    React.createElement("button", { className: "tap", onClick: () => setTimer(null), style: ui.secondary }, "Stop"))),
             tab === "training" && React.createElement(React.Fragment, null,
+                (() => { const ph = phaseInfo(data.settings.phase); if (!ph)
+                    return null; return React.createElement("section", { style: { ...ui.panel, borderColor: ph.done ? C.green : C.line, paddingTop: 12, paddingBottom: 12 } },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 } },
+                        React.createElement("span", { style: { fontSize: 13, fontWeight: 700, color: ph.done ? C.green : C.bone } }, ph.done ? `${ph.name} afgerond` : `${ph.name} \u00b7 week ${ph.week} van ${ph.weeks}`),
+                        React.createElement("span", { style: { fontSize: 12, color: C.muted } }, ph.done ? "tijd voor een nieuwe fase" : `nog ${ph.daysLeft} ${ph.daysLeft === 1 ? "dag" : "dagen"}`)),
+                    React.createElement("div", { style: { height: 4, borderRadius: 2, background: C.line, marginTop: 9, overflow: "hidden" } },
+                        React.createElement("div", { style: { width: `${ph.pct}%`, height: "100%", background: ph.done ? C.green : C.ochre } })),
+                    React.createElement("div", { style: { fontSize: 11, color: C.muted, marginTop: 7 } }, ph.done ? "Plan een InBody en bepaal je volgende doel." : `tot ${fmt(ph.end.toISOString())} \u00b7 plan je InBody rond die datum`)); })(),
                 React.createElement("section", { style: { ...ui.panel, borderColor: C.ochreDim } },
                     React.createElement("div", { style: ui.label }, "Nu aan de beurt"),
-                    React.createElement("div", { style: { fontSize: 23, fontWeight: 800, color: C.ochre } },
+                    React.createElement("div", { style: { fontSize: 24, fontWeight: 600, letterSpacing: "-.02em", color: C.bone } },
                         "Sessie ",
                         upNext),
                     React.createElement("div", { style: { color: C.muted, fontSize: 12, marginTop: 4 } }, data.meta.last ? `Laatst afgerond: sessie ${data.meta.last} op ${fmt(data.meta.lastDate)}` : "Nog geen sessie afgerond. Begin bij A.")),
-                React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 12 } }, ["A", "B"].map(k => React.createElement("button", { key: k, className: "tap", onClick: () => { setSession(k); setCompleted({}); setSnapshots({}); }, style: { ...ui.secondary, flex: 1, borderColor: session === k ? C.ochre : C.line, background: session === k ? C.ochre : "transparent", color: session === k ? C.ink : C.bone } },
+                React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 12 } }, ["A", "B"].map(k => React.createElement("button", { key: k, className: "tap", onClick: () => { setSession(k); setCompleted({}); setSnapshots({}); }, style: { ...ui.secondary, flex: 1, fontWeight: session === k ? 600 : 400, borderColor: session === k ? C.ochreDim : C.lineSoft, background: session === k ? C.ochreBg : "transparent", color: session === k ? C.ochre : C.muted } },
                     "Sessie ",
                     k))),
                 React.createElement("div", { style: { ...ui.panel, display: "flex", justifyContent: "space-between", alignItems: "center" } },
@@ -251,16 +278,16 @@ export default function Trainingslogboek() {
                 SESSIONS[session].map(item => {
                     const st = current[item.id];
                     const done = completed[item.id];
-                    return React.createElement("article", { key: item.id, style: { ...ui.panel, padding: 0, overflow: "hidden", borderColor: C.line, opacity: done ? .55 : 1 } },
+                    return React.createElement("article", { key: item.id, style: { ...ui.panel, padding: 0, overflow: "hidden", borderColor: done ? (done === "completed" ? C.green : C.ochreDim) : C.line, borderLeft: `4px solid ${done ? (done === "completed" ? C.green : C.ochreDim) : "transparent"}`, opacity: done ? .78 : 1 } },
                         React.createElement("div", { style: { padding: "13px 13px 0", display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 8 } },
-                            React.createElement("strong", { style: { fontSize: 15, color: C.bone } }, item.name),
-                            React.createElement("span", { style: { fontSize: 11, color: C.muted, textAlign: "right" } }, done ? "afgerond" : item.group)),
+                            React.createElement("strong", { style: { fontSize: 15, fontWeight: 500, color: C.bone } }, item.name),
+                            React.createElement("span", { style: { fontSize: 11, fontWeight: done ? 700 : 400, color: done ? (done === "completed" ? C.green : C.ochre) : C.muted, textAlign: "right" } }, done === "completed" ? "\u2713 gehaald" : done === "not_completed" ? "\u2713 gedaan \u2014 blijft staan" : item.group)),
                         React.createElement("div", { style: { padding: 13 } }, item.fixed ? React.createElement(React.Fragment, null,
-                            React.createElement("div", { style: { fontSize: 22, fontWeight: 800 } }, item.fixed),
+                            React.createElement("div", { style: { fontSize: 22, fontWeight: 600, letterSpacing: "-.02em" } }, item.fixed),
                             React.createElement("div", { style: { color: C.muted, fontSize: 12, margin: "7px 0 12px" } }, item.cue),
-                            React.createElement("button", { className: "tap", onClick: () => done ? undoExercise(item) : markExercise(item, "completed"), style: done ? { ...ui.secondary, width: "100%", color: C.muted } : { ...ui.primary, width: "100%" } }, done ? "Afgerond \u2014 tik om te wijzigen" : "Markeer als afgerond")) : React.createElement(React.Fragment, null,
+                            React.createElement("button", { className: "tap", onClick: () => done ? undoExercise(item) : markExercise(item, "completed"), style: done ? { ...ui.secondary, width: "100%", color: C.green, borderColor: C.green } : { ...ui.primary, width: "100%" } }, done ? "Gehaald \u2014 tik om te wijzigen" : "Markeer als afgerond")) : React.createElement(React.Fragment, null,
                             React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" } },
-                                React.createElement("strong", { style: { fontSize: 26, letterSpacing: "-0.02em" } }, LADDER[st.rung]),
+                                React.createElement("strong", { style: { fontSize: 26, fontWeight: 600, letterSpacing: "-0.02em" } }, LADDER[st.rung]),
                                 React.createElement("span", { style: { color: C.line } }, "|"),
                                 React.createElement("label", { htmlFor: `weight-${item.id}`, style: { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" } }, `Gewicht voor ${item.name}`),
                                 React.createElement("input", { id: `weight-${item.id}`, inputMode: "decimal", value: st.weight ?? "", placeholder: "\u2014", onChange: e => setExercise(item.id, { weight: e.target.value }), onBlur: () => setExercise(item.id, { weight: parseNumber(st.weight) }), style: { ...ui.input, width: 76, minHeight: 44, padding: "6px 8px", fontSize: 17, background: "transparent", borderColor: C.line } }),
@@ -279,14 +306,12 @@ export default function Trainingslogboek() {
                                 React.createElement("input", { id: `new-${item.id}`, autoFocus: true, inputMode: "decimal", value: newWeight, onChange: e => setNewWeight(e.target.value), style: ui.input }),
                                 React.createElement("div", { style: { display: "flex", gap: 8, marginTop: 8 } },
                                     React.createElement("button", { className: "tap", onClick: () => confirmNewWeight(item), style: { ...ui.primary, flex: 1 } }, "Start op 3x8"),
-                                    React.createElement("button", { className: "tap", onClick: () => setNewWeightFor(null), style: ui.secondary }, "Annuleren"))) : done ? React.createElement("button", { className: "tap", onClick: () => undoExercise(item), style: { ...ui.secondary, width: "100%", color: C.muted } }, done === "completed" ? "Gehaald \u2014 tik om te wijzigen" : "Blijft staan \u2014 tik om te wijzigen") : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 8 } },
+                                    React.createElement("button", { className: "tap", onClick: () => setNewWeightFor(null), style: ui.secondary }, "Annuleren"))) : done ? React.createElement("button", { className: "tap", onClick: () => undoExercise(item), style: { ...ui.secondary, width: "100%", color: done === "completed" ? C.green : C.ochre, borderColor: done === "completed" ? C.green : C.ochreDim } }, done === "completed" ? "Gehaald \u2014 tik om te wijzigen" : "Blijft staan \u2014 tik om te wijzigen") : React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1.4fr 1fr", gap: 8 } },
                                 React.createElement("button", { className: "tap", onClick: () => advance(item), style: { ...ui.primary } }, "Gehaald"),
                                 React.createElement("button", { className: "tap", onClick: () => stayOnRung(item), style: { ...ui.secondary, minHeight: 46 } }, "Nog niet")))));
                 }),
-                React.createElement("button", { className: "tap", onClick: finishSession, style: { ...ui.primary, width: "100%", minHeight: 54 } },
-                    "Sessie ",
-                    session,
-                    " afronden")),
+                React.createElement("button", { className: "tap", onClick: finishSession, style: { ...ui.primary, width: "100%", minHeight: 68, marginTop: 18, background: C.green, color: "#0E1408", fontSize: 17, fontWeight: 800, letterSpacing: "0.01em", borderRadius: 12, boxShadow: `0 0 0 1px ${C.green}, 0 6px 22px rgba(127,160,90,.28)` } },
+                    `Sessie ${session} afronden \u2713`)),
             tab === "week" && React.createElement("section", { style: ui.panel },
                 React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
                     React.createElement("button", { className: "tap", "aria-label": "Vorige week", onClick: () => setWeekOffset(x => x - 1), style: ui.secondary }, "\u2190"),
@@ -310,13 +335,13 @@ export default function Trainingslogboek() {
                     ".")),
             tab === "gewicht" && React.createElement(React.Fragment, null,
                 React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Weging toevoegen"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Weging toevoegen"),
                     React.createElement("label", { htmlFor: "bodyweight", style: ui.label }, "Lichaamsgewicht in kg"),
                     React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr auto", gap: 8 } },
                         React.createElement("input", { id: "bodyweight", inputMode: "decimal", value: kgInput, onChange: e => setKgInput(e.target.value), onKeyDown: e => e.key === "Enter" && addWeight(), placeholder: "88,5", style: ui.input }),
                         React.createElement("button", { className: "tap", onClick: addWeight, style: ui.primary }, "Bewaren"))),
                 weeklyAvgs.length ? React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Weekgemiddelden"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Weekgemiddelden"),
                     React.createElement("p", { style: { color: C.muted, fontSize: 12 } },
                         "Laatste gemiddelde: ",
                         React.createElement("strong", { style: { color: C.bone } },
@@ -331,7 +356,7 @@ export default function Trainingslogboek() {
                             nl(w.kg),
                             " kg")))) : React.createElement("section", { style: ui.panel }, "Nog geen gewichtstrend. Voeg minimaal twee metingen toe om het verloop te zien."),
                 data.weights.length > 1 && React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Verloop"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Verloop"),
                     React.createElement(ResponsiveContainer, { width: "100%", height: 220 },
                         React.createElement(LineChart, { data: data.weights.map(w => ({ d: fmt(w.d), kg: w.kg })) },
                             React.createElement(CartesianGrid, { stroke: C.line, vertical: false }),
@@ -340,6 +365,60 @@ export default function Trainingslogboek() {
                             React.createElement(Tooltip, null),
                             React.createElement(ReferenceLine, { y: data.settings.weightGoal, stroke: C.green }),
                             React.createElement(Line, { type: "monotone", dataKey: "kg", stroke: C.ochre, strokeWidth: 3 }))))),
+            tab === "slaap" && React.createElement(React.Fragment, null,
+                (() => { const f = sleepForm; const inBed = bedHours(f.bed, f.up); const slept = parseNumber(f.slept); const eff = inBed && slept ? Math.round(slept / inBed * 1000) / 10 : null; const set = (k, v) => setSleepForm(p => ({ ...p, [k]: v })); return React.createElement("section", { style: ui.panel },
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Vannacht"),
+                    React.createElement("label", { htmlFor: "sl-d", style: ui.label }, "Datum (ochtend na de nacht)"),
+                    React.createElement("input", { id: "sl-d", type: "date", value: f.d, onChange: e => set("d", e.target.value), style: ui.input }),
+                    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 } },
+                        React.createElement("div", null,
+                            React.createElement("label", { htmlFor: "sl-bed", style: ui.label }, "Naar bed"),
+                            React.createElement("input", { id: "sl-bed", type: "time", value: f.bed, onChange: e => set("bed", e.target.value), style: ui.input })),
+                        React.createElement("div", null,
+                            React.createElement("label", { htmlFor: "sl-up", style: ui.label }, "Uit bed"),
+                            React.createElement("input", { id: "sl-up", type: "time", value: f.up, onChange: e => set("up", e.target.value), style: ui.input }))),
+                    React.createElement("label", { htmlFor: "sl-slept", style: { ...ui.label, marginTop: 12 } }, "Uren daadwerkelijk geslapen"),
+                    React.createElement("input", { id: "sl-slept", inputMode: "decimal", placeholder: "6,5", value: f.slept, onChange: e => set("slept", e.target.value), style: ui.input }),
+                    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12 } },
+                        React.createElement("div", null,
+                            React.createElement("label", { htmlFor: "sl-q", style: ui.label }, "Hoe goed sliep je (1-10)"),
+                            React.createElement("input", { id: "sl-q", inputMode: "numeric", value: f.quality, onChange: e => set("quality", e.target.value), style: ui.input })),
+                        React.createElement("div", null,
+                            React.createElement("label", { htmlFor: "sl-m", style: ui.label }, "Hoe voel je je (1-10)"),
+                            React.createElement("input", { id: "sl-m", inputMode: "numeric", value: f.morning, onChange: e => set("morning", e.target.value), style: ui.input }))),
+                    React.createElement("label", { htmlFor: "sl-n", style: { ...ui.label, marginTop: 12 } }, "Bijzonderheden"),
+                    React.createElement("input", { id: "sl-n", value: f.note, placeholder: "onrustig, laat gegeten, kind wakker", onChange: e => set("note", e.target.value), style: ui.input }),
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, gap: 10 } },
+                        React.createElement("div", { style: { fontSize: 12, color: C.muted } }, inBed ? `${nl(inBed)} uur in bed${eff ? ` \u00b7 efficientie ${nl(eff)}%` : ""}` : "vul je tijden in"),
+                        React.createElement("button", { className: "tap", onClick: saveSleep, style: ui.primary }, "Opslaan"))); })(),
+                (() => { const ws = sleepWeeks(data.sleep || []); if (!ws.length)
+                    return React.createElement("section", { style: ui.panel },
+                        React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Nog geen slaapgegevens"),
+                        React.createElement("p", { style: { fontSize: 12.5, color: C.muted, lineHeight: 1.6, margin: 0 } }, "Vul elke ochtend je nacht in. Na een week staat hier je gemiddelde slaapefficientie, het getal dat je meeneemt naar je behandelaar.")); return React.createElement("section", { style: ui.panel },
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Per week"),
+                    ws.slice().reverse().map(w => React.createElement("div", { key: w.key, style: { padding: "10px 0", borderBottom: `1px solid ${C.line}` } },
+                        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline" } },
+                            React.createElement("span", { style: { fontSize: 12.5, color: C.muted } }, `week van ${fmt(w.key)} \u00b7 ${w.n} ${w.n === 1 ? "nacht" : "nachten"}`),
+                            React.createElement("strong", { style: { fontSize: 19, color: w.eff >= 85 ? C.green : C.bone } }, w.eff ? `${nl(w.eff)}%` : "\u2014")),
+                        React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 3 } }, `${nl(w.inBed)} uur in bed \u00b7 ${nl(w.slept)} uur slaap${w.quality ? ` \u00b7 kwaliteit ${nl(w.quality)}` : ""}`))),
+                    React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, marginBottom: 0, marginTop: 12 } }, "Slaapefficientie is je slaaptijd gedeeld door je tijd in bed. Wat je met dat getal doet, bepaalt je behandelaar \u2014 de app rekent alleen.")); })(),
+                (data.sleep || []).length > 2 && React.createElement("section", { style: ui.panel },
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Efficientie per nacht"),
+                    React.createElement(ResponsiveContainer, { width: "100%", height: 200 },
+                        React.createElement(LineChart, { data: (data.sleep || []).map(e => ({ d: fmt(e.d), eff: efficiency(e) })), margin: { top: 5, right: 8, left: -24, bottom: 0 } },
+                            React.createElement(CartesianGrid, { stroke: C.line, vertical: false }),
+                            React.createElement(XAxis, { dataKey: "d", stroke: C.muted, tick: { fontSize: 10 } }),
+                            React.createElement(YAxis, { stroke: C.muted, tick: { fontSize: 10 }, domain: [40, 100] }),
+                            React.createElement(Tooltip, { contentStyle: { background: C.cardHi, border: `1px solid ${C.line}`, borderRadius: 7, fontSize: 12 } }),
+                            React.createElement(ReferenceLine, { y: 85, stroke: C.green, strokeDasharray: "4 4" }),
+                            React.createElement(Line, { type: "monotone", dataKey: "eff", stroke: C.ochre, strokeWidth: 2, dot: { r: 3, fill: C.ochre } })))),
+                (data.sleep || []).length > 0 && React.createElement("section", { style: ui.panel },
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Laatste nachten"),
+                    (data.sleep || []).slice(-7).reverse().map(e => React.createElement("div", { key: e.d, style: { padding: "9px 0", borderBottom: `1px solid ${C.line}`, fontSize: 12.5 } },
+                        React.createElement("div", { style: { display: "flex", justifyContent: "space-between" } },
+                            React.createElement("span", null, fmt(e.d)),
+                            React.createElement("span", { style: { color: C.muted } }, `${e.bed}\u2013${e.up} \u00b7 ${nl(e.slept)} u \u00b7 ${nl(efficiency(e))}%`)),
+                        e.note && React.createElement("div", { style: { color: C.muted, marginTop: 3 } }, e.note))))),
             tab === "analyse" && React.createElement(React.Fragment, null,
                 React.createElement("section", { style: ui.panel },
                     React.createElement("span", { style: ui.label }, "Sinds de start"),
@@ -354,7 +433,7 @@ export default function Trainingslogboek() {
                             React.createElement("strong", { style: { fontSize: 25 } }, data.history.length),
                             React.createElement("small", { style: { display: "block", color: C.muted } }, "sessies")))),
                 weekBars.length ? React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Trainingen per week"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Trainingen per week"),
                     React.createElement(ResponsiveContainer, { width: "100%", height: 200 },
                         React.createElement(BarChart, { data: weekBars },
                             React.createElement(CartesianGrid, { stroke: C.line, vertical: false }),
@@ -365,7 +444,7 @@ export default function Trainingslogboek() {
                             React.createElement(Bar, { dataKey: "sport", name: "Sportschool", fill: C.ochre, stackId: "a" }),
                             React.createElement(Bar, { dataKey: "vecht", name: "Vechtsport", fill: C.ochreDim, stackId: "a" })))) : React.createElement("section", { style: ui.panel }, "Rond je eerste trainingsweek af om hier een weekgrafiek te zien."),
                 React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Progressie per oefening"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Progressie per oefening"),
                     progress.map(p => React.createElement("div", { key: p.name, style: { padding: "9px 0", borderBottom: `1px solid ${C.line}` } },
                         React.createElement("strong", null, p.name),
                         React.createElement("div", { style: { color: C.muted, fontSize: 12, marginTop: 3 } },
@@ -375,16 +454,19 @@ export default function Trainingslogboek() {
                             " ",
                             p.to)))),
                 React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Doelen en voorkeuren"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Doelen en voorkeuren"),
                     React.createElement("label", { htmlFor: "goal-weight", style: ui.label }, "Gewichtsdoel"),
                     React.createElement("input", { id: "goal-weight", inputMode: "decimal", value: data.settings.weightGoal, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, weightGoal: parseNumber(e.target.value) ?? "" } })), style: ui.input }),
                     React.createElement("label", { htmlFor: "goal-gym", style: { ...ui.label, marginTop: 12 } }, "Sportschoolsessies per week"),
                     React.createElement("input", { id: "goal-gym", type: "number", min: "1", max: "7", value: data.settings.weeklyGymGoal, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, weeklyGymGoal: Number(e.target.value) } })), style: ui.input }),
-                    React.createElement("label", { style: { display: "flex", alignItems: "center", gap: 10, minHeight: 48, marginTop: 8 } },
-                        React.createElement("input", { type: "checkbox", checked: data.settings.restTimer, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, restTimer: e.target.checked } })) }),
-                        " Rusttimer automatisch starten")),
+                    React.createElement("label", { htmlFor: "phase-name", style: { ...ui.label, marginTop: 16 } }, "Huidige fase"),
+                    React.createElement("input", { id: "phase-name", value: (data.settings.phase || {}).name || "", placeholder: "Cut", onChange: e => patch(d => ({ ...d, settings: { ...d.settings, phase: { ...(d.settings.phase || {}), name: e.target.value } } })), style: ui.input }),
+                    React.createElement("label", { htmlFor: "phase-start", style: { ...ui.label, marginTop: 12 } }, "Startdatum"),
+                    React.createElement("input", { id: "phase-start", type: "date", value: (data.settings.phase || {}).start || "", onChange: e => patch(d => ({ ...d, settings: { ...d.settings, phase: { ...(d.settings.phase || {}), start: e.target.value } } })), style: ui.input }),
+                    React.createElement("label", { htmlFor: "phase-weeks", style: { ...ui.label, marginTop: 12 } }, "Aantal weken"),
+                    React.createElement("input", { id: "phase-weeks", type: "number", min: "1", max: "52", value: (data.settings.phase || {}).weeks || 8, onChange: e => patch(d => ({ ...d, settings: { ...d.settings, phase: { ...(d.settings.phase || {}), weeks: Number(e.target.value) } } })), style: ui.input })),
                 React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 15, color: C.ochre } }, "Gegevens beheren"),
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Gegevens beheren"),
                     React.createElement("p", { style: { color: C.muted, fontSize: 12, lineHeight: 1.5 } }, "Een analysebestand bevat trainingsdagen, oefeningen en lichaamsgewicht. Een JSON-bestand is een volledige herstelbare back-up."),
                     React.createElement("div", { style: { display: "grid", gap: 8 } },
                         React.createElement("button", { className: "tap", onClick: copySummary, style: ui.secondary }, "Samenvatting kopieren"),
@@ -397,5 +479,5 @@ export default function Trainingslogboek() {
             React.createElement("span", null, toast),
             undo && React.createElement("button", { className: "tap", onClick: undoFinish, style: { border: 0, background: "none", color: C.ochreDim, fontWeight: 800, minHeight: 44 } }, "Ongedaan maken")),
         React.createElement("nav", { "aria-label": "Hoofdnavigatie", style: { position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 10, background: C.card, borderTop: `1px solid ${C.line}`, padding: "7px max(8px, env(safe-area-inset-right)) calc(7px + env(safe-area-inset-bottom))" } },
-            React.createElement("div", { style: { maxWidth: 540, margin: "auto", display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 4 } }, [["training", "Training"], ["week", "Week"], ["gewicht", "Gewicht"], ["analyse", "Analyse"]].map(([k, l]) => React.createElement("button", { key: k, className: "tap", "aria-current": tab === k ? "page" : undefined, onClick: () => setTab(k), style: { minHeight: 48, border: 0, borderRadius: 7, background: tab === k ? C.ochre : "transparent", color: tab === k ? C.ink : C.muted, fontWeight: 750 } }, l)))));
+            React.createElement("div", { style: { maxWidth: 540, margin: "auto", display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 4 } }, [["training", "Training"], ["week", "Week"], ["gewicht", "Gewicht"], ["slaap", "Slaap"], ["analyse", "Analyse"]].map(([k, l]) => React.createElement("button", { key: k, className: "tap", "aria-current": tab === k ? "page" : undefined, onClick: () => setTab(k), style: { position: "relative", minHeight: 48, border: 0, borderRadius: 7, background: "transparent", color: tab === k ? C.ochre : C.muted, fontWeight: tab === k ? 600 : 400, fontSize: 12.5, padding: "0 2px" } }, React.createElement("span", { style: { display: "block", height: 2, width: 18, margin: "0 auto 5px", borderRadius: 1, background: tab === k ? C.ochre : "transparent" } }), l)))));
 }
