@@ -8,29 +8,29 @@ const SESSIONS = {
     A: [
         { id: "warm_a", name: "Warming-up", group: "Cardiovasculair", fixed: "5 min rustig", rest: 0, cue: "Loopband, roeier of crosstrainer. Daarna 1-2 lichte opwarmsets van je eerste zware oefening (tellen niet mee)." },
         { id: "rot_a", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "3 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
-        { id: "legpress", name: "Leg press", group: "Quadriceps | Hamstrings", weight: 60, unit: "kg", rung: 0, rest: 120 },
-        { id: "chestpress", name: "Incline chest press", group: "Bovenkant borst | Triceps", weight: 20, unit: "kg per kant", rung: 2, rest: 90 },
-        { id: "pulldown", name: "Convergent pull down", group: "Rug | Biceps", weight: 35, unit: "kg per kant", rung: 2, rest: 75, cue: "Beweging start in je schouders." },
-        { id: "sapd", name: "Straight arm pull down", group: "Brede rugspier", weight: 21, unit: "kg", rung: 0, rest: 60, cue: "Lats. Armen gestrekt, beweging uit je schouderbladen." },
-        { id: "legcurl", name: "Leg curl", group: "Hamstrings", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: zoek je startgewicht." },
-        { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 2, rest: 60 },
+        { id: "legpress", name: "Leg press", group: "Quadriceps | Hamstrings", weight: 25, unit: "kg per kant", rung: 5, rest: 120 },
+        { id: "chestpress", name: "Incline chest press", group: "Bovenkant borst | Triceps", weight: 20, unit: "kg per kant", rung: 3, rest: 90 },
+        { id: "pulldown", name: "Convergent pull down", group: "Rug | Biceps", weight: 35, unit: "kg per kant", rung: 4, rest: 75, cue: "Beweging start in je schouders." },
+        { id: "sapd", name: "Straight arm pull down", group: "Brede rugspier", weight: 21, unit: "kg", rung: 3, rest: 60, cue: "Lats. Armen gestrekt, beweging uit je schouderbladen." },
+        { id: "legcurl", name: "Leg curl", group: "Hamstrings", weight: 35, unit: "kg", rung: 0, rest: 60, cue: "Knie op het joint centre. Dijbeenpad strak boven je knieen." },
+        { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 5, rest: 60 },
         { id: "lateral_a", name: "Lateral raise", group: "Schouders (zijkant)", weight: 6, unit: "kg", rung: 0, rest: 45, cue: "Breedte. Licht gewicht, ellebogen leiden." },
-        { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 0, unit: "kg", rung: 0, rest: 60, cue: "Nieuw. Ellebogen tegen je zij, geen zwaai." },
-        { id: "calf_a", name: "Calf raise", group: "Kuiten", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Volledig omhoog, langzaam zakken." },
+        { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Ellebogen tegen je zij, geen zwaai." },
+        { id: "calf_a", name: "Calf raise", group: "Kuiten", weight: 35, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
         { id: "plank", name: "Plank", group: "Rechte buikspieren", fixed: "3 x 40 sec", rest: 30 }
     ],
     B: [
         { id: "warm_b", name: "Warming-up", group: "Cardiovasculair", fixed: "5 min rustig", rest: 0, cue: "Loopband, roeier of crosstrainer. Daarna 1-2 lichte opwarmsets van je eerste zware oefening (tellen niet mee)." },
         { id: "rot_b", name: "Schouderrotaties", group: "Rotatorenmanchet", fixed: "3 x 15 | 5 kg", rest: 0, cue: "Onderhoud. Niet zwaarder worden." },
-        { id: "split", name: "Split squat", group: "Quadriceps | Bilspieren", weight: null, unit: "kg", rung: 0, rest: 60, cue: "Nieuw: per been tellen." },
+        { id: "split", name: "Split squat", group: "Quadriceps | Bilspieren", weight: 8, unit: "kg per kant", rung: 0, rest: 60, cue: "Per been. Begin met je rechterbeen (zwakste) en houd dat aantal aan voor links." },
         { id: "arnold", name: "Arnold press", group: "Schouders | Triceps", weight: 12, unit: "kg", rung: 2, rest: 90, cue: "3x10 eerst schoon afmaken." },
-        { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg", rung: 3, rest: 75, cue: "Ellebogen achter je torso." },
-        { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 0, unit: "kg", rung: 0, rest: 90, cue: "Licht houden, geen zware hoofdoefening. Pad onder je heupbotten, stop bij een rechte lijn." },
-        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 6, unit: "kg", rung: 0, rest: 45 },
-        { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60 },
-        { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Licht gewicht, knijp je schouderbladen samen." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 0, unit: "kg", rung: 0, rest: 45, cue: "Nieuw. Volledig omhoog, langzaam zakken." },
-        { id: "crunch", name: "Cable crunch", group: "Rechte buikspieren", weight: null, unit: "kg", rung: 0, rest: 45, cue: "Nieuw: buig vanuit je romp." }
+        { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg per kant", rung: 3, rest: 75, cue: "Machine met de twee losse grepen. Schouders naar voren laten komen bij het strekken, ellebogen achter je torso." },
+        { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 5, unit: "kg", rung: 0, rest: 90, cue: "Pad op het halve gaatje, nummer 8 zichtbaar. Schijf tegen je borst. Stop bij een rechte lijn." },
+        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 6, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
+        { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Touw, duimen omhoog. Stop rond borsthoogte, niet dichtvouwen. Ellebogen tegen je zij." },
+        { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 15, unit: "kg", rung: 0, rest: 45, cue: "Panatta rear delt machine. Kleinere uitslag: stop op een lijn met je romp. Bij pijn in je linkerschouder direct stoppen." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 35, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "crunch", name: "Crunch machine", group: "Rechte buikspieren", weight: 20, unit: "kg", rung: 0, rest: 45, cue: "Buigen vanuit je romp. Handen alleen ter plaatsing, niet aan trekken." },
     ]
 };
 const SLOTS = [
@@ -103,10 +103,16 @@ export default function Trainingslogboek() {
     const [snapshots, setSnapshots] = useState({});
     const [status, setStatus] = useState("laden");
     const [error, setError] = useState("");
-    const [toast, setToast] = useState("");
+    const [toast, setToastRaw] = useState("");
+    const toastTimer = useRef(null);
+    const setToast = msg => { setToastRaw(msg); if (toastTimer.current)
+        clearTimeout(toastTimer.current); if (msg)
+        toastTimer.current = setTimeout(() => setToastRaw(""), 3500); };
+    useEffect(() => () => { if (toastTimer.current)
+        clearTimeout(toastTimer.current); }, []);
     const [weekOffset, setWeekOffset] = useState(0);
     const [kgInput, setKgInput] = useState("");
-    const [sleepForm, setSleepForm] = useState({ d: new Date().toISOString().slice(0, 10), bed: "23:00", up: "07:00", slept: "", quality: "", morning: "", note: "" });
+    const [sleepForm, setSleepForm] = useState({ d: new Date().toISOString().slice(0, 10), bed: "23:00", up: "07:00", sleptH: "6", sleptM: "0", quality: "", morning: "", note: "" });
     const [newWeightFor, setNewWeightFor] = useState(null);
     const [newWeight, setNewWeight] = useState("");
     const [undo, setUndo] = useState(null);
@@ -189,7 +195,6 @@ export default function Trainingslogboek() {
         setToast(`Sessie ${session} afgerond`);
         setError("");
         window.scrollTo({ top: 0, behavior: "smooth" });
-        setTimeout(() => setToast(""), 5000);
     };
     const undoFinish = () => { if (undo) {
         setData(undo);
@@ -197,12 +202,14 @@ export default function Trainingslogboek() {
         setToast("Afronding ongedaan gemaakt");
     } };
     const saveSleep = () => { const f = sleepForm; if (!f.d || !bedHours(f.bed, f.up))
-        return setError("Vul een geldige bedtijd en opsta-tijd in."); const slept = parseNumber(f.slept); if (slept === null || slept <= 0 || slept > 16)
-        return setError("Vul het aantal uren slaap in (bijvoorbeeld 6,5)."); const entry = { d: f.d, bed: f.bed, up: f.up, slept, quality: parseNumber(f.quality), morning: parseNumber(f.morning), note: (f.note || "").slice(0, 200) }; patch(d => ({ ...d, sleep: [...(d.sleep || []).filter(x => x.d !== entry.d), entry].sort((a, b) => a.d.localeCompare(b.d)) })); setError(""); setToast("Slaap opgeslagen"); };
+        return setError("Vul een geldige bedtijd en opsta-tijd in."); const slept = Math.round(((Number(f.sleptH) || 0) + (Number(f.sleptM) || 0) / 60) * 100) / 100; if (!slept || slept <= 0 || slept > 16)
+        return setError("Vul in hoeveel je hebt geslapen."); const entry = { d: f.d, bed: f.bed, up: f.up, slept, quality: parseNumber(f.quality), morning: parseNumber(f.morning), note: (f.note || "").trim().slice(0, 1000) }; patch(d => ({ ...d, sleep: [...(d.sleep || []).filter(x => x.d !== entry.d), entry].sort((a, b) => a.d.localeCompare(b.d)) })); setError(""); setToast("Slaap opgeslagen"); };
     const addWeight = () => { const n = parseNumber(kgInput); if (n == null || n < 30 || n > 250) {
         setError("Voer een lichaamsgewicht tussen 30 en 250 kg in.");
         return;
     } const d = new Date().toISOString().slice(0, 10); patch(x => ({ ...x, weights: [...x.weights.filter(w => w.d !== d), { d, kg: n }].sort((a, b) => a.d.localeCompare(b.d)) })); setKgInput(""); setError(""); };
+    const resetBaseline = () => { if (!window.confirm("Het startpunt wordt op je huidige standen gezet. Je wegingen, slaapgegevens, weekregistratie en historie blijven ongewijzigd. Doorgaan?"))
+        return; patch(d => ({ ...d, baseline: { date: new Date().toISOString(), exercises: JSON.parse(JSON.stringify(d.exercises)) } })); setToast("Startpunt op vandaag gezet"); };
     const exportJson = () => download(`trainingslogboek-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ ...data, exportedAt: new Date().toISOString() }, null, 2), "application/json");
     const exportCsv = () => { const rows = [["datum", "tijd", "week", "sessie", "oefening", "spiergroep", "uitgevoerd gewicht", "eenheid", "uitgevoerde trede", "resultaat", "volgend gewicht", "volgende trede"]]; data.history.forEach(h => { const d = new Date(h.date); h.exercises.forEach(e => rows.push([d.toLocaleDateString("nl-NL"), d.toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }), fmt(weekKey(d)), h.session, e.name, e.group, nlCsv(e.performedWeight ?? e.weight), e.performedUnit ?? e.unit ?? "", e.performedTarget ?? e.target ?? "", e.result === "completed" ? "gehaald" : e.result === "not_completed" ? "niet gehaald" : String(e.result ?? ""), nlCsv(e.nextWeight), e.nextTarget ?? ""])); }); download(`trainingsanalyse-${new Date().toISOString().slice(0, 10)}.csv`, "\uFEFF" + rows.map(r => r.map(csvCell).join(";")).join("\r\n"), "text/csv;charset=utf-8"); };
     const importJson = e => { const f = e.target.files?.[0]; if (!f)
@@ -384,7 +391,7 @@ export default function Trainingslogboek() {
                         React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: C.bone } }, w.nr < 1 ? "Slaaptraject begint nog" : `Slaaptraject \u00b7 week ${w.nr}`),
                         React.createElement("span", { style: { fontSize: 12, color: C.muted } }, w.nr < 1 ? `over ${-w.days} ${-w.days === 1 ? "dag" : "dagen"}` : `dag ${w.dayInWeek} van 7`)),
                     React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 5 } }, `gestart op ${fmt(data.settings.sleepStart)} \u00b7 ${Math.max(0, w.days + 1)} dagen onderweg`)); })(),
-                (() => { const f = sleepForm; const inBed = bedHours(f.bed, f.up); const slept = parseNumber(f.slept); const eff = inBed && slept ? Math.round(slept / inBed * 1000) / 10 : null; const set = (k, v) => setSleepForm(p => ({ ...p, [k]: v })); return React.createElement("section", { style: ui.panel },
+                (() => { const f = sleepForm; const inBed = bedHours(f.bed, f.up); const slept = (Number(f.sleptH) || 0) + (Number(f.sleptM) || 0) / 60; const eff = inBed && slept ? Math.round(slept / inBed * 1000) / 10 : null; const set = (k, v) => setSleepForm(p => ({ ...p, [k]: v })); return React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Vannacht"),
                     React.createElement("label", { htmlFor: "sl-d", style: ui.label }, "Datum (ochtend na de nacht)"),
                     React.createElement("input", { id: "sl-d", type: "date", value: f.d, onChange: e => set("d", e.target.value), style: ui.input }),
@@ -395,8 +402,14 @@ export default function Trainingslogboek() {
                         React.createElement("div", null,
                             React.createElement("label", { htmlFor: "sl-up", style: ui.label }, "Uit bed"),
                             React.createElement("input", { id: "sl-up", type: "time", value: f.up, onChange: e => set("up", e.target.value), style: ui.input }))),
-                    React.createElement("label", { htmlFor: "sl-slept", style: { ...ui.label, marginTop: 12 } }, "Uren daadwerkelijk geslapen"),
-                    React.createElement("input", { id: "sl-slept", inputMode: "decimal", placeholder: "6,5", value: f.slept, onChange: e => set("slept", e.target.value), style: ui.input }),
+                    React.createElement("span", { style: { ...ui.label, marginTop: 12 } }, "Daadwerkelijk geslapen"),
+                    React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 } },
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                            React.createElement("select", { "aria-label": "Uren geslapen", value: f.sleptH, onChange: e => set("sleptH", e.target.value), style: { ...ui.input, flex: 1 } }, Array.from({ length: 15 }, (_, i) => React.createElement("option", { key: i, value: String(i) }, i))),
+                            React.createElement("span", { style: { fontSize: 13, color: C.muted } }, "uur")),
+                        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: 7 } },
+                            React.createElement("select", { "aria-label": "Minuten geslapen", value: f.sleptM, onChange: e => set("sleptM", e.target.value), style: { ...ui.input, flex: 1 } }, Array.from({ length: 12 }, (_, i) => React.createElement("option", { key: i, value: String(i * 5) }, i * 5))),
+                            React.createElement("span", { style: { fontSize: 13, color: C.muted } }, "min"))),
                     React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 12, alignItems: "end" } },
                         React.createElement("div", null,
                             React.createElement("label", { htmlFor: "sl-q", style: ui.label }, "Slaapkwaliteit 1-10"),
@@ -405,7 +418,7 @@ export default function Trainingslogboek() {
                             React.createElement("label", { htmlFor: "sl-m", style: ui.label }, "Gevoel vanmorgen 1-10"),
                             React.createElement("input", { id: "sl-m", inputMode: "numeric", value: f.morning, onChange: e => set("morning", e.target.value), style: ui.input }))),
                     React.createElement("label", { htmlFor: "sl-n", style: { ...ui.label, marginTop: 12 } }, "Bijzonderheden"),
-                    React.createElement("input", { id: "sl-n", value: f.note, placeholder: "onrustig, laat gegeten, kind wakker", onChange: e => set("note", e.target.value), style: ui.input }),
+                    React.createElement("textarea", { id: "sl-n", value: f.note, rows: 3, placeholder: "onrustig, laat gegeten, kind wakker", onChange: e => set("note", e.target.value), style: { ...ui.input, minHeight: 76, lineHeight: 1.5, resize: "vertical", fontSize: 15 } }),
                     React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 14, gap: 10 } },
                         React.createElement("div", { style: { fontSize: 12, color: C.muted } }, inBed ? `${nl(inBed)} uur in bed` : "vul je tijden in"),
                         React.createElement("button", { className: "tap", onClick: saveSleep, style: ui.primary }, "Opslaan"))); })(),
@@ -427,7 +440,7 @@ export default function Trainingslogboek() {
                             React.createElement("span", null, fmt(e.d)),
                             React.createElement("span", { style: { color: C.muted } }, `${e.bed}\u2013${e.up} \u00b7 ${nl(e.slept)} u geslapen`),
                             React.createElement("button", { className: "tap", "aria-label": `Verwijder nacht van ${fmt(e.d)}`, onClick: () => patch(d => ({ ...d, sleep: (d.sleep || []).filter(x => x.d !== e.d) })), style: { background: "none", border: 0, color: C.muted, minHeight: 44, minWidth: 44, fontSize: 15, cursor: "pointer" } }, "\u00d7")),
-                        e.note && React.createElement("div", { style: { color: C.muted, marginTop: 3 } }, e.note))))),
+                        e.note && React.createElement("div", { style: { color: C.muted, marginTop: 3, whiteSpace: "pre-wrap", wordBreak: "break-word" } }, e.note))))),
             tab === "analyse" && React.createElement(React.Fragment, null,
                 React.createElement("section", { style: ui.panel },
                     React.createElement("span", { style: ui.label }, "Sinds de start"),
@@ -483,6 +496,8 @@ export default function Trainingslogboek() {
                         React.createElement("button", { className: "tap", onClick: copySummary, style: ui.secondary }, "Samenvatting kopieren"),
                         React.createElement("button", { className: "tap", onClick: exportCsv, disabled: !data.history.length, style: { ...ui.primary, opacity: data.history.length ? 1 : .5 } }, "Analysebestand exporteren (.csv)"),
                         React.createElement("button", { className: "tap", onClick: exportJson, style: ui.secondary }, "Volledige back-up maken (.json)"),
+                        React.createElement("button", { className: "tap", onClick: resetBaseline, style: ui.secondary }, "Startpunt op nu zetten"),
+                        React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, margin: "2px 0 0" } }, `Huidig startpunt: ${fmt(data.baseline.date)}. Zet dit op nu zodra al je gewichten kloppen \u2014 daarna meet je analyse vanaf de werkelijke stand. Maak eerst een back-up.`),
                         React.createElement("button", { className: "tap", onClick: () => fileInput.current?.click(), style: ui.secondary }, "Back-up terugzetten"),
                         React.createElement("input", { ref: fileInput, hidden: true, type: "file", accept: "application/json,.json", onChange: importJson })),
                     React.createElement("textarea", { readOnly: true, value: summary, "aria-label": "Voorvertoning van de samenvatting", style: { ...ui.input, height: 130, marginTop: 10, fontFamily: "monospace", fontSize: 12 } })))),
