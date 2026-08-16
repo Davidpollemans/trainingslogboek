@@ -76,7 +76,7 @@ const phaseInfo = p => {
     const week = Math.min(weeks, Math.max(1, Math.floor(daysDone / 7) + 1));
     return { name: p.name || "Fase", start, end, weeks, week, daysLeft, totalDays, pct: Math.min(100, Math.max(0, daysDone / totalDays * 100)), done: daysDone >= totalDays, started: daysDone >= 0 };
 };
-const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 }, sleepStart: "2026-08-09" } });
+const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], active: { completed: {}, snapshots: {} }, weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 }, sleepStart: "2026-08-09" } });
 const storage = {
     async get(key) { if (window.storage?.get)
         return window.storage.get(key); const value = localStorage.getItem(key); return value ? { value } : null; },
@@ -86,6 +86,8 @@ const storage = {
 function migrate(raw) {
     if (!raw)
         return newState();
+    const active = raw.active && typeof raw.active === "object" && !Array.isArray(raw.active) ? { completed: raw.active.completed || {}, snapshots: raw.active.snapshots || {} } : { completed: {}, snapshots: {} };
+    raw = { ...raw, active };
     const exercises = { ...defaultExercises(), ...(raw.exercises || raw.ex || {}) };
     if (raw.version === VERSION)
         return { ...newState(), ...raw, exercises, baseline: raw.baseline && raw.baseline.date ? { date: raw.baseline.date, exercises: { ...defaultExercises(), ...(raw.baseline.exercises || raw.baseline.ex || {}) } } : { date: new Date().toISOString(), exercises } };
@@ -99,8 +101,10 @@ export default function Trainingslogboek() {
     const [loaded, setLoaded] = useState(false);
     const [tab, setTab] = useState("training");
     const [session, setSession] = useState("A");
-    const [completed, setCompleted] = useState({});
-    const [snapshots, setSnapshots] = useState({});
+    const completed = (data.active && data.active.completed) || {};
+    const snapshots = (data.active && data.active.snapshots) || {};
+    const setCompleted = fn => patch(d => ({ ...d, active: { ...(d.active || {}), completed: typeof fn === "function" ? fn((d.active || {}).completed || {}) : fn } }));
+    const setSnapshots = fn => patch(d => ({ ...d, active: { ...(d.active || {}), snapshots: typeof fn === "function" ? fn((d.active || {}).snapshots || {}) : fn } }));
     const [status, setStatus] = useState("laden");
     const [error, setError] = useState("");
     const [toast, setToastRaw] = useState("");
@@ -189,8 +193,9 @@ export default function Trainingslogboek() {
         const exercises = SESSIONS[session].map(item => { const snap = snapshots[item.id] || snapOf(item, current[item.id] || {}); const now2 = item.fixed ? null : current[item.id]; return ({ exerciseId: item.id, name: item.name, group: item.group, fixed: item.fixed || null, performedWeight: snap.weight, performedUnit: snap.unit, performedTarget: snap.target, result: completed[item.id], nextWeight: now2 ? now2.weight : null, nextTarget: now2 ? LADDER[now2.rung] : item.fixed }); });
         patch(d => ({ ...d, meta: { last: session, lastDate: now.toISOString() }, history: [...d.history, { id: crypto.randomUUID?.() || String(Date.now()), date: now.toISOString(), session, exercises }], weeks: { ...d.weeks, [weekKey(now)]: { ...(d.weeks[weekKey(now)] || {}), ...(slot ? { [slot]: true } : {}) } } }));
         setUndo(before);
-        setCompleted({});
-        setSnapshots({});
+        const ids = SESSIONS[session].map(x => x.id);
+        setCompleted(c => Object.fromEntries(Object.entries(c).filter(([k]) => !ids.includes(k))));
+        setSnapshots(p => Object.fromEntries(Object.entries(p).filter(([k]) => !ids.includes(k))));
         setSession(session === "A" ? "B" : "A");
         setToast(`Sessie ${session} afgerond`);
         setError("");
@@ -274,7 +279,7 @@ export default function Trainingslogboek() {
                         "Sessie ",
                         upNext),
                     React.createElement("div", { style: { color: C.muted, fontSize: 12, marginTop: 4 } }, data.meta.last ? `Laatst afgerond: sessie ${data.meta.last} op ${fmt(data.meta.lastDate)}` : "Nog geen sessie afgerond. Begin bij A.")),
-                React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 12 } }, ["A", "B"].map(k => React.createElement("button", { key: k, className: "tap", onClick: () => { setSession(k); setCompleted({}); setSnapshots({}); }, style: { ...ui.secondary, flex: 1, fontWeight: session === k ? 600 : 400, borderColor: session === k ? C.ochreDim : C.lineSoft, background: session === k ? C.ochreBg : "transparent", color: session === k ? C.ochre : C.muted } },
+                React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 12 } }, ["A", "B"].map(k => React.createElement("button", { key: k, className: "tap", onClick: () => setSession(k), style: { ...ui.secondary, flex: 1, fontWeight: session === k ? 600 : 400, borderColor: session === k ? C.ochreDim : C.lineSoft, background: session === k ? C.ochreBg : "transparent", color: session === k ? C.ochre : C.muted } },
                     "Sessie ",
                     k))),
                 React.createElement("div", { style: { ...ui.panel, display: "flex", justifyContent: "space-between", alignItems: "center" } },
