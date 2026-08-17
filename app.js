@@ -58,7 +58,7 @@ const bedHours = (bed, up) => { const b = hhmm(bed), u = hhmm(up); if (b === nul
 const efficiency = e => { const inBed = bedHours(e.bed, e.up); if (!inBed || !e.slept)
     return null; return Math.round(e.slept / inBed * 1000) / 10; };
 const sleepWeeks = (list, startStr) => { const start = new Date((startStr || (list[0] && list[0].d) || new Date().toISOString().slice(0, 10)) + "T12:00:00"); const m = {}; list.forEach(e => { const idx = Math.floor((new Date(e.d + "T12:00:00") - start) / 6048e5); if (idx >= 0)
-    (m[idx] = m[idx] || []).push(e); }); return Object.keys(m).map(Number).sort((a, b) => a - b).map(idx => { const es = m[idx]; const avg = f => { const v = es.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; const from = new Date(start.getTime() + idx * 6048e5); return { idx, nr: idx + 1, from: from.toISOString().slice(0, 10), n: es.length, inBed: avg(e => bedHours(e.bed, e.up)), slept: avg(e => e.slept), eff: avg(e => efficiency(e)), quality: avg(e => e.quality) }; }); };
+    (m[idx] = m[idx] || []).push(e); }); return Object.keys(m).map(Number).sort((a, b) => a - b).map(idx => { const es = m[idx]; const avg = f => { const v = es.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; const from = new Date(start.getTime() + idx * 6048e5); return { idx, nr: idx + 1, from: from.toISOString().slice(0, 10), n: es.length, nights: es.slice().sort((a, b) => b.d.localeCompare(a.d)), inBed: avg(e => bedHours(e.bed, e.up)), slept: avg(e => e.slept), eff: avg(e => efficiency(e)), quality: avg(e => e.quality) }; }); };
 const sleepWeekNow = startStr => { if (!startStr)
     return null; const start = new Date(startStr + "T12:00:00"); const today = new Date(); today.setHours(12, 0, 0, 0); const days = Math.floor((today - start) / 864e5); if (days < 0)
     return { nr: 0, days, start }; return { nr: Math.floor(days / 7) + 1, days, start, dayInWeek: days % 7 + 1 }; };
@@ -116,6 +116,7 @@ export default function Trainingslogboek() {
         clearTimeout(toastTimer.current); }, []);
     const [weekOffset, setWeekOffset] = useState(0);
     const [kgInput, setKgInput] = useState("");
+    const [openWeek, setOpenWeek] = useState(null);
     const [sleepForm, setSleepForm] = useState({ d: new Date().toISOString().slice(0, 10), bed: "23:00", up: "07:00", sleptH: "6", sleptM: "0", quality: "", morning: "", note: "" });
     const [newWeightFor, setNewWeightFor] = useState(null);
     const [newWeight, setNewWeight] = useState("");
@@ -432,20 +433,19 @@ export default function Trainingslogboek() {
                         React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: C.bone, marginTop: 0 } }, "Nog geen slaapgegevens"),
                         React.createElement("p", { style: { fontSize: 12.5, color: C.muted, lineHeight: 1.6, margin: 0 } }, "Vul elke ochtend je nacht in. Aan het eind van je eerste volle week verschijnt hier je gemiddelde slaapefficientie \u2014 het getal dat je meeneemt naar je behandelaar.")); return React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, color: C.bone, marginTop: 0 } }, "Per week"),
-                    ws.slice().reverse().map(w => { const nr = w.nr; const lopend = nu && nu.nr === nr; const compleet = !lopend || w.n >= 7; return React.createElement("div", { key: w.idx, style: { padding: "11px 0", borderBottom: `1px solid ${C.lineSoft}` } },
-                        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 } },
-                            React.createElement("span", { style: { fontSize: 13, color: C.bone } }, `Week ${nr}`),
-                            compleet ? React.createElement("strong", { style: { fontSize: 20, fontWeight: 600, color: w.eff >= 85 ? C.green : C.bone } }, w.eff ? `${nl(w.eff)}%` : "\u2014") : React.createElement("span", { style: { fontSize: 12, color: C.muted } }, `nog ${7 - w.n} ${7 - w.n === 1 ? "nacht" : "nachten"}`)),
-                        React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 3 } }, compleet ? `vanaf ${fmt(w.from)} \u00b7 ${nl(w.inBed)} uur in bed \u00b7 ${nl(w.slept)} uur slaap` : `vanaf ${fmt(w.from)} \u00b7 ${w.n} van 7 nachten ingevuld`)); }),
-                    React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, marginBottom: 0, marginTop: 12 } }, "Je efficientie verschijnt pas als de week vol is. Tussentijds op je cijfers kijken helpt je slaap niet. Wat je met het weekgetal doet, bepaalt je behandelaar \u2014 de app rekent alleen.")); })(),
-                (data.sleep || []).length > 0 && React.createElement("section", { style: ui.panel },
-                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Laatste nachten"),
-                    (data.sleep || []).slice(-7).reverse().map(e => React.createElement("div", { key: e.d, style: { padding: "9px 0", borderBottom: `1px solid ${C.line}`, fontSize: 12.5 } },
-                        React.createElement("div", { style: { display: "flex", justifyContent: "space-between" } },
-                            React.createElement("span", null, fmt(e.d)),
-                            React.createElement("span", { style: { color: C.muted } }, `${e.bed}\u2013${e.up} \u00b7 ${nl(e.slept)} u geslapen`),
-                            React.createElement("button", { className: "tap", "aria-label": `Verwijder nacht van ${fmt(e.d)}`, onClick: () => patch(d => ({ ...d, sleep: (d.sleep || []).filter(x => x.d !== e.d) })), style: { background: "none", border: 0, color: C.muted, minHeight: 44, minWidth: 44, fontSize: 15, cursor: "pointer" } }, "\u00d7")),
-                        e.note && React.createElement("div", { style: { color: C.muted, marginTop: 3, whiteSpace: "pre-wrap", wordBreak: "break-word" } }, e.note))))),
+                    ws.slice().reverse().map(w => { const nr = w.nr; const lopend = nu && nu.nr === nr; const compleet = !lopend || w.n >= 7; const open = openWeek === w.idx || (openWeek === null && lopend); return React.createElement("div", { key: w.idx, style: { borderBottom: `1px solid ${C.lineSoft}` } },
+                        React.createElement("button", { className: "tap", "aria-expanded": open, onClick: () => setOpenWeek(open ? -1 : w.idx), style: { width: "100%", background: "none", border: 0, padding: "12px 0", textAlign: "left", cursor: "pointer", fontFamily: "inherit", color: C.bone } },
+                            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: 10 } },
+                                React.createElement("span", { style: { fontSize: 13.5, fontWeight: lopend ? 600 : 400 } }, `${open ? "\u2013" : "+"}  Week ${nr}${lopend ? " \u00b7 nu" : ""}`),
+                                compleet ? React.createElement("strong", { style: { fontSize: 20, fontWeight: 600, color: w.eff >= 85 ? C.green : C.bone } }, w.eff ? `${nl(w.eff)}%` : "\u2014") : React.createElement("span", { style: { fontSize: 12, color: C.muted } }, `nog ${7 - w.n} ${7 - w.n === 1 ? "nacht" : "nachten"}`)),
+                            React.createElement("div", { style: { fontSize: 11.5, color: C.muted, marginTop: 3 } }, compleet ? `vanaf ${fmt(w.from)} \u00b7 ${nl(w.inBed)} uur in bed \u00b7 ${nl(w.slept)} uur slaap` : `vanaf ${fmt(w.from)} \u00b7 ${w.n} van 7 nachten ingevuld`)),
+                        open && React.createElement("div", { style: { paddingBottom: 8 } }, w.nights.map(e => React.createElement("div", { key: e.d, style: { padding: "8px 0 8px 12px", borderTop: `1px solid ${C.lineSoft}`, fontSize: 12.5 } },
+                            React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 } },
+                                React.createElement("span", { style: { color: C.bone } }, fmt(e.d)),
+                                React.createElement("span", { style: { color: C.muted, marginLeft: "auto" } }, `${e.bed}\u2013${e.up} \u00b7 ${nl(e.slept)} u`),
+                                React.createElement("button", { className: "tap", "aria-label": `Verwijder nacht van ${fmt(e.d)}`, onClick: () => patch(d => ({ ...d, sleep: (d.sleep || []).filter(x => x.d !== e.d) })), style: { background: "none", border: 0, color: C.muted, minHeight: 44, minWidth: 44, fontSize: 15, cursor: "pointer" } }, "\u00d7")),
+                            e.note && React.createElement("div", { style: { color: C.muted, marginTop: 2, whiteSpace: "pre-wrap", wordBreak: "break-word" } }, e.note))))); }),
+                    React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, marginBottom: 0, marginTop: 12 } }, "Je efficientie verschijnt pas als de week vol is. Tussentijds op je cijfers kijken helpt je slaap niet. Wat je met het weekgetal doet, bepaalt je behandelaar \u2014 de app rekent alleen.")); })()),
             tab === "analyse" && React.createElement(React.Fragment, null,
                 React.createElement("section", { style: ui.panel },
                     React.createElement("span", { style: ui.label }, "Sinds de start"),
