@@ -14,9 +14,9 @@ const SESSIONS = {
         { id: "sapd", name: "Straight arm pull down", group: "Brede rugspier", weight: 21, unit: "kg", rung: 3, rest: 60, cue: "Lats. Armen gestrekt, beweging uit je schouderbladen." },
         { id: "legcurl", name: "Leg curl", group: "Hamstrings", weight: 35, unit: "kg", rung: 0, rest: 60, cue: "Knie op het joint centre. Dijbeenpad strak boven je knieen." },
         { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 5, rest: 60 },
-        { id: "lateral_a", name: "Lateral raise", group: "Schouders (zijkant)", weight: 6, unit: "kg", rung: 0, rest: 45, cue: "Breedte. Licht gewicht, ellebogen leiden." },
+        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
         { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Ellebogen tegen je zij, geen zwaai." },
-        { id: "calf_a", name: "Calf raise", group: "Kuiten", weight: 35, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 50, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
         { id: "plank", name: "Plank", group: "Rechte buikspieren", fixed: "3 x 40 sec", rest: 30 }
     ],
     B: [
@@ -26,10 +26,10 @@ const SESSIONS = {
         { id: "arnold", name: "Arnold press", group: "Schouders | Triceps", weight: 12, unit: "kg", rung: 2, rest: 90, cue: "3x10 eerst schoon afmaken." },
         { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg per kant", rung: 3, rest: 75, cue: "Machine met de twee losse grepen. Schouders naar voren laten komen bij het strekken, ellebogen achter je torso." },
         { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 5, unit: "kg", rung: 0, rest: 90, cue: "Pad op het halve gaatje, nummer 8 zichtbaar. Schijf tegen je borst. Stop bij een rechte lijn." },
-        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 6, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
+        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
         { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Touw, duimen omhoog. Stop rond borsthoogte, niet dichtvouwen. Ellebogen tegen je zij." },
         { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 15, unit: "kg", rung: 0, rest: 45, cue: "Panatta rear delt machine. Kleinere uitslag: stop op een lijn met je romp. Bij pijn in je linkerschouder direct stoppen." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 35, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 50, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
         { id: "crunch", name: "Crunch machine", group: "Rechte buikspieren", weight: 20, unit: "kg", rung: 0, rest: 45, cue: "Buigen vanuit je romp. Handen alleen ter plaatsing, niet aan trekken." },
     ]
 };
@@ -48,7 +48,7 @@ const mondayOf = d => { const x = new Date(d); x.setDate(x.getDate() - ((x.getDa
 const weekKey = d => { const m = mondayOf(d); return `${m.getFullYear()}-${String(m.getMonth() + 1).padStart(2, "0")}-${String(m.getDate()).padStart(2, "0")}`; };
 const parseNumber = v => { const n = Number(String(v).replace(",", ".")); return Number.isFinite(n) ? n : null; };
 const nl = (v, d = 1) => v == null ? "-" : Number(v).toFixed(d).replace(".", ",");
-const allItems = () => [...SESSIONS.A, ...SESSIONS.B];
+const allItems = () => { const seen = new Set(); return [...SESSIONS.A, ...SESSIONS.B].filter(x => seen.has(x.id) ? false : seen.add(x.id)); };
 const defaultExercises = () => Object.fromEntries(allItems().filter(x => !x.fixed).map(x => [x.id, { weight: x.weight, unit: x.unit, rung: x.rung }]));
 const hhmm = t => { if (!t || !/^\d{1,2}:\d{2}$/.test(t))
     return null; const [h, m] = t.split(":").map(Number); return h + m / 60; };
