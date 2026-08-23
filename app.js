@@ -154,7 +154,7 @@ export default function Trainingslogboek() {
     const wkKey = weekKey(viewWeekDate), viewWeek = data.weeks[wkKey] || {};
     const performed = SESSIONS[session].filter(i => completed[i.id]).length;
     const weeklyAvgs = useMemo(() => { const m = {}; data.weights.forEach(w => { var _a; return ((m[_a = weekKey(new Date(`${w.d}T12:00:00`))] || (m[_a] = [])).push(w.kg)); }); return Object.keys(m).sort().map(key => ({ key, week: fmt(key), kg: m[key].reduce((a, b) => a + b, 0) / m[key].length })); }, [data.weights]);
-    const weekBars = useMemo(() => Object.keys(data.weeks).sort().slice(-8).map(key => ({ week: fmt(key), sport: SLOTS.filter(s => s.gym && data.weeks[key][s.id]).length, vecht: SLOTS.filter(s => !s.gym && data.weeks[key][s.id]).length })), [data.weeks]);
+    const weekBars = useMemo(() => Object.keys(data.weeks).sort().slice(-8).map(key => ({ week: fmt(key) + (data.weeks[key].away ? " \u2708" : ""), away: !!data.weeks[key].away, sport: data.weeks[key].away ? 0 : SLOTS.filter(s => s.gym && data.weeks[key][s.id]).length, vecht: data.weeks[key].away ? 0 : SLOTS.filter(s => !s.gym && data.weeks[key][s.id]).length })), [data.weeks]);
     const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const def = { weight: item.weight, unit: item.unit, rung: item.rung }; const b = (data.baseline && data.baseline.exercises && data.baseline.exercises[item.id]) || current[item.id] || def; const n = current[item.id] || b || def; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${LADDER[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${LADDER[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * LADDER.length) }; }), [data.baseline, current]);
     const totalMoments = progress.reduce((a, p) => a + p.moments, 0);
     const weeksIn = Math.max(0, Math.floor((Date.now() - new Date(data.baseline.date).getTime()) / 6048e5));
@@ -332,24 +332,22 @@ export default function Trainingslogboek() {
             tab === "week" && React.createElement("section", { style: ui.panel },
                 React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 } },
                     React.createElement("button", { className: "tap", "aria-label": "Vorige week", onClick: () => setWeekOffset(x => x - 1), style: ui.secondary }, "\u2190"),
-                    React.createElement("div", { style: { textAlign: "center" } },
-                        React.createElement("span", { style: ui.label }, weekOffset === 0 ? "Deze week" : "Week"),
-                        React.createElement("strong", null,
+                    React.createElement("button", { className: "tap", onClick: () => setWeekOffset(0), style: { background: "none", border: 0, textAlign: "center", cursor: "pointer", fontFamily: "inherit", color: C.bone, padding: 0 } },
+                        React.createElement("span", { style: ui.label }, weekOffset === 0 ? "Deze week" : weekOffset === -1 ? "Vorige week" : weekOffset === 1 ? "Volgende week" : weekOffset < 0 ? `${-weekOffset} weken terug` : `${weekOffset} weken vooruit`),
+                        React.createElement("strong", { style: { display: "block" } },
                             "vanaf ",
                             fmt(wkKey))),
-                    React.createElement("button", { className: "tap", "aria-label": "Volgende week", disabled: weekOffset >= 0, onClick: () => setWeekOffset(x => Math.min(0, x + 1)), style: ui.secondary }, "\u2192")),
+                    React.createElement("button", { className: "tap", "aria-label": "Volgende week", onClick: () => setWeekOffset(x => x + 1), style: ui.secondary }, "\u2192")),
                 SLOTS.map(s => { const on = !!viewWeek[s.id]; return React.createElement("button", { key: s.id, className: "tap", "aria-pressed": on, onClick: () => patch(d => ({ ...d, weeks: { ...d.weeks, [wkKey]: { ...(d.weeks[wkKey] || {}), [s.id]: !on } } })), style: { ...ui.secondary, width: "100%", display: "flex", alignItems: "center", gap: 12, marginBottom: 8, background: on ? C.cardHi : "transparent", borderColor: on ? C.ochre : C.line } },
                     React.createElement("span", { style: { width: 24, color: on ? C.ochre : C.muted } }, on ? "✓" : "○"),
                     React.createElement("strong", { style: { width: 25 } }, s.label),
                     React.createElement("span", { style: { flex: 1, textAlign: "left" } },
                         s.name,
                         s.optional ? " (inhaaloptie)" : "")); }),
-                React.createElement("p", { style: { color: C.muted, fontSize: 12 } },
-                    "Sportschool: ",
-                    SLOTS.filter(s => s.gym && viewWeek[s.id]).length,
-                    " van ",
-                    data.settings.weeklyGymGoal,
-                    ".")),
+                React.createElement("button", { className: "tap", "aria-pressed": !!viewWeek.away, onClick: () => patch(d => ({ ...d, weeks: { ...d.weeks, [wkKey]: { ...(d.weeks[wkKey] || {}), away: !viewWeek.away } } })), style: { ...ui.secondary, width: "100%", display: "flex", alignItems: "center", gap: 12, marginTop: 6, background: viewWeek.away ? C.cardHi : "transparent", borderColor: viewWeek.away ? C.ochreDim : C.lineSoft, color: viewWeek.away ? C.ochre : C.muted } },
+                    React.createElement("span", { style: { width: 24 } }, viewWeek.away ? "\u2713" : "\u25cb"),
+                    React.createElement("span", { style: { flex: 1, textAlign: "left" } }, "Vakantie of afwezig \u2014 telt niet mee")),
+                React.createElement("p", { style: { color: C.muted, fontSize: 12, marginBottom: 0 } }, viewWeek.away ? "Deze week blijft buiten je gemiddelde en je reeks." : `Sportschool: ${SLOTS.filter(s => s.gym && viewWeek[s.id]).length} van ${data.settings.weeklyGymGoal}.`)),
             tab === "gewicht" && React.createElement(React.Fragment, null,
                 React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Weging toevoegen"),
