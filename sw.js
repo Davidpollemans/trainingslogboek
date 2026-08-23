@@ -3,7 +3,7 @@
    - overige eigen bestanden: stale-while-revalidate
    - externe modules (esm.sh): cache-first, want die versies staan vast
    - fallback naar index.html ALLEEN voor navigatieverzoeken            */
-const VERSION = "v4";
+const VERSION = "v5";
 const SHELL = `shell-${VERSION}`;
 const VENDOR = `vendor-${VERSION}`;
 const CORE = ["./", "./index.html", "./app.js", "./manifest.webmanifest", "./icon.svg",
@@ -24,7 +24,9 @@ self.addEventListener("activate", e => {
 const fresh = async (req, cacheName) => {
   const cache = await caches.open(cacheName);
   try {
-    const res = await fetch(req);
+    // cache: "reload" slaat de HTTP-cache van de browser over,
+    // anders krijgen we een oude app.js terug van GitHub Pages.
+    const res = await fetch(req, { cache: "reload" });
     if (res && res.ok) cache.put(req, res.clone());
     return res;
   } catch (err) {
@@ -58,7 +60,7 @@ self.addEventListener("fetch", event => {
   }
 
   // Eigen app-code: netwerk eerst, zodat een nieuwe versie meteen aankomt.
-  if (url.pathname.endsWith("/app.js") || url.pathname.endsWith("/manifest.webmanifest")) {
+  if (url.pathname.endsWith("/app.js") || url.pathname.endsWith("/manifest.webmanifest") || url.pathname.endsWith("/sw.js")) {
     event.respondWith(fresh(request, SHELL));
     return;
   }
