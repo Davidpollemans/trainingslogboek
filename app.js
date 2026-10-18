@@ -16,7 +16,7 @@ const SESSIONS = {
         { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 5, rest: 60 },
         { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
         { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Ellebogen tegen je zij, geen zwaai." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 50, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
         { id: "plank", name: "Plank", group: "Rechte buikspieren", fixed: "3 x 40 sec", rest: 30 }
     ],
     B: [
@@ -28,8 +28,9 @@ const SESSIONS = {
         { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 5, unit: "kg", rung: 0, rest: 90, cue: "Pad op het halve gaatje, nummer 8 zichtbaar. Schijf tegen je borst. Stop bij een rechte lijn." },
         { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
         { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Touw, duimen omhoog. Stop rond borsthoogte, niet dichtvouwen. Ellebogen tegen je zij." },
+        { id: "fly", name: "Cable fly", group: "Borst", weight: 10, unit: "kg per kant", rung: 0, rest: 60, cue: "Nieuw. Lichte bocht in je ellebogen, die hoek blijft gelijk." },
         { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 15, unit: "kg", rung: 0, rest: 45, cue: "Panatta rear delt machine. Kleinere uitslag: stop op een lijn met je romp. Bij pijn in je linkerschouder direct stoppen." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 50, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
         { id: "crunch", name: "Crunch machine", group: "Rechte buikspieren", weight: 20, unit: "kg", rung: 0, rest: 45, cue: "Buigen vanuit je romp. Handen alleen ter plaatsing, niet aan trekken." },
     ]
 };
@@ -62,6 +63,32 @@ const sleepWeeks = (list, startStr) => { const start = new Date((startStr || (li
 const sleepWeekNow = startStr => { if (!startStr)
     return null; const start = new Date(startStr + "T12:00:00"); const today = new Date(); today.setHours(12, 0, 0, 0); const days = Math.floor((today - start) / 864e5); if (days < 0)
     return { nr: 0, days, start }; return { nr: Math.floor(days / 7) + 1, days, start, dayInWeek: days % 7 + 1 }; };
+const phaseProgress = (weights, startStr) => {
+    if (!startStr)
+        return null;
+    const start = new Date(startStr + "T12:00:00");
+    const since = (weights || []).filter(w => new Date(w.d + "T12:00:00") >= start);
+    const first = f => { for (const w of since) { if (typeof w[f] === "number") return w; } return null; };
+    const last = f => { for (let i = since.length - 1; i >= 0; i--) { if (typeof since[i][f] === "number") return since[i]; } return null; };
+    const kgA = first("kg"), kgB = last("kg"), waA = first("waist"), waB = last("waist");
+    const days = Math.max(1, Math.round((Date.now() - start.getTime()) / 864e5));
+    const dKg = kgA && kgB && kgA.d !== kgB.d ? kgB.kg - kgA.kg : null;
+    const dWa = waA && waB && waA.d !== waB.d ? waB.waist - waA.waist : null;
+    return { kg: kgB ? kgB.kg : null, waist: waB ? waB.waist : null, dKg, dWa, perWeek: dKg != null ? dKg / (days / 7) : null, days, nKg: since.filter(w => typeof w.kg === "number").length, nWa: since.filter(w => typeof w.waist === "number").length };
+};
+const buildVerdict = p => {
+    if (!p || p.dKg == null || p.nKg < 4)
+        return { text: "Nog te weinig metingen om iets te zeggen. Weeg drie keer per week.", tone: "muted" };
+    if (p.dWa == null || p.nWa < 2)
+        return { text: "Meet je taille \u2014 zonder dat getal zie je niet of je bouwt of opvult.", tone: "muted" };
+    if (p.dWa > 1.5)
+        return { text: "Je taille groeit mee. Haal er 200 kcal af.", tone: "warn" };
+    if (p.perWeek > 0.4)
+        return { text: `Je komt ${nl(p.perWeek)} kg per week aan \u2014 sneller dan de 0,2 tot 0,3 die je wilt. Haal er 200 kcal af.`, tone: "warn" };
+    if (p.perWeek < 0.05)
+        return { text: "Je gewicht staat stil. Zet er 200 kcal bij.", tone: "warn" };
+    return { text: "Gewicht stijgt rustig, taille blijft vlak. Je bouwt.", tone: "good" };
+};
 const phaseInfo = p => {
     if (!p || !p.start)
         return null;
@@ -76,7 +103,7 @@ const phaseInfo = p => {
     const week = Math.min(weeks, Math.max(1, Math.floor(daysDone / 7) + 1));
     return { name: p.name || "Fase", start, end, weeks, week, daysLeft, totalDays, pct: Math.min(100, Math.max(0, daysDone / totalDays * 100)), done: daysDone >= totalDays, started: daysDone >= 0 };
 };
-const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], active: { completed: {}, snapshots: {} }, weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Cut", start: "2026-08-10", weeks: 8 }, sleepStart: "2026-08-09" } });
+const newState = () => ({ version: VERSION, exercises: defaultExercises(), meta: { last: null, lastDate: null }, weights: [], sleep: [], active: { completed: {}, snapshots: {} }, weeks: {}, history: [], baseline: { date: new Date().toISOString(), exercises: defaultExercises() }, settings: { weightGoal: 86, weeklyGymGoal: 3, phase: { name: "Opbouw", start: "2026-10-19", weeks: 16 }, sleepStart: "2026-08-09" } });
 const storage = {
     async get(key) { if (window.storage?.get)
         return window.storage.get(key); const value = localStorage.getItem(key); return value ? { value } : null; },
@@ -116,6 +143,7 @@ export default function Trainingslogboek() {
         clearTimeout(toastTimer.current); }, []);
     const [weekOffset, setWeekOffset] = useState(0);
     const [kgInput, setKgInput] = useState("");
+    const [waistInput, setWaistInput] = useState("");
     const [openWeek, setOpenWeek] = useState(null);
     const [sleepForm, setSleepForm] = useState({ d: new Date().toISOString().slice(0, 10), bed: "23:00", up: "07:00", sleptH: "6", sleptM: "0", quality: "", morning: "", note: "" });
     const [newWeightFor, setNewWeightFor] = useState(null);
@@ -153,7 +181,7 @@ export default function Trainingslogboek() {
     const viewWeekDate = useMemo(() => { const d = mondayOf(new Date()); d.setDate(d.getDate() + weekOffset * 7); return d; }, [weekOffset]);
     const wkKey = weekKey(viewWeekDate), viewWeek = data.weeks[wkKey] || {};
     const performed = SESSIONS[session].filter(i => completed[i.id]).length;
-    const weeklyAvgs = useMemo(() => { const m = {}; data.weights.forEach(w => { var _a; return ((m[_a = weekKey(new Date(`${w.d}T12:00:00`))] || (m[_a] = [])).push(w.kg)); }); return Object.keys(m).sort().map(key => ({ key, week: fmt(key), kg: m[key].reduce((a, b) => a + b, 0) / m[key].length })); }, [data.weights]);
+    const weeklyAvgs = useMemo(() => { const m = {}; data.weights.forEach(w => { const k = weekKey(new Date(`${w.d}T12:00:00`)); (m[k] || (m[k] = [])).push(w); }); const avg = (arr, f) => { const v = arr.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; return Object.keys(m).sort().map(key => ({ key, week: fmt(key), kg: avg(m[key], e => e.kg), waist: avg(m[key], e => e.waist) })); }, [data.weights]);
     const weekBars = useMemo(() => Object.keys(data.weeks).sort().slice(-8).map(key => ({ week: fmt(key) + (data.weeks[key].away ? " \u2708" : ""), away: !!data.weeks[key].away, sport: data.weeks[key].away ? 0 : SLOTS.filter(s => s.gym && data.weeks[key][s.id]).length, vecht: data.weeks[key].away ? 0 : SLOTS.filter(s => !s.gym && data.weeks[key][s.id]).length })), [data.weeks]);
     const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const def = { weight: item.weight, unit: item.unit, rung: item.rung }; const b = (data.baseline && data.baseline.exercises && data.baseline.exercises[item.id]) || current[item.id] || def; const n = current[item.id] || b || def; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${LADDER[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${LADDER[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * LADDER.length) }; }), [data.baseline, current]);
     const totalMoments = progress.reduce((a, p) => a + p.moments, 0);
@@ -210,10 +238,18 @@ export default function Trainingslogboek() {
     const saveSleep = () => { const f = sleepForm; if (!f.d || !bedHours(f.bed, f.up))
         return setError("Vul een geldige bedtijd en opsta-tijd in."); const slept = Math.round(((Number(f.sleptH) || 0) + (Number(f.sleptM) || 0) / 60) * 100) / 100; if (!slept || slept <= 0 || slept > 16)
         return setError("Vul in hoeveel je hebt geslapen."); const entry = { d: f.d, bed: f.bed, up: f.up, slept, quality: parseNumber(f.quality), morning: parseNumber(f.morning), note: (f.note || "").trim().slice(0, 1000) }; patch(d => ({ ...d, sleep: [...(d.sleep || []).filter(x => x.d !== entry.d), entry].sort((a, b) => a.d.localeCompare(b.d)) })); setError(""); setToast("Slaap opgeslagen"); };
-    const addWeight = () => { const n = parseNumber(kgInput); if (n == null || n < 30 || n > 250) {
+    const addWeight = () => { const n = parseNumber(kgInput); const w = parseNumber(waistInput); if (n == null && w == null) {
+        setError("Vul een gewicht of een tailleomtrek in.");
+        return;
+    } if (n != null && (n < 30 || n > 250)) {
         setError("Voer een lichaamsgewicht tussen 30 en 250 kg in.");
         return;
-    } const d = new Date().toISOString().slice(0, 10); patch(x => ({ ...x, weights: [...x.weights.filter(w => w.d !== d), { d, kg: n }].sort((a, b) => a.d.localeCompare(b.d)) })); setKgInput(""); setError(""); };
+    } if (w != null && (w < 40 || w > 200)) {
+        setError("Voer een tailleomtrek tussen 40 en 200 cm in.");
+        return;
+    } const d = new Date().toISOString().slice(0, 10); patch(x => { const prev = x.weights.find(e => e.d === d) || {}; const entry = { d }; const kg = n != null ? n : prev.kg; const waist = w != null ? w : prev.waist; if (kg != null)
+        entry.kg = kg; if (waist != null)
+        entry.waist = waist; return { ...x, weights: [...x.weights.filter(e => e.d !== d), entry].sort((a, b) => a.d.localeCompare(b.d)) }; }); setKgInput(""); setWaistInput(""); setError(""); };
     const resetBaseline = () => { if (!window.confirm("Het startpunt wordt op je huidige standen gezet. Je wegingen, slaapgegevens, weekregistratie en historie blijven ongewijzigd. Doorgaan?"))
         return; patch(d => ({ ...d, baseline: { date: new Date().toISOString(), exercises: JSON.parse(JSON.stringify(d.exercises)) } })); setToast("Startpunt op vandaag gezet"); };
     const exportJson = () => download(`trainingslogboek-backup-${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify({ ...data, exportedAt: new Date().toISOString() }, null, 2), "application/json");
@@ -349,12 +385,27 @@ export default function Trainingslogboek() {
                     React.createElement("span", { style: { flex: 1, textAlign: "left" } }, "Vakantie of afwezig \u2014 telt niet mee")),
                 React.createElement("p", { style: { color: C.muted, fontSize: 12, marginBottom: 0 } }, viewWeek.away ? "Deze week blijft buiten je gemiddelde en je reeks." : `Sportschool: ${SLOTS.filter(s => s.gym && viewWeek[s.id]).length} van ${data.settings.weeklyGymGoal}.`)),
             tab === "gewicht" && React.createElement(React.Fragment, null,
+                (() => { const ph = phaseInfo(data.settings.phase); const pr = phaseProgress(data.weights, (data.settings.phase || {}).start); if (!ph || !pr)
+                    return null; const v = buildVerdict(pr); const kleur = v.tone === "good" ? C.green : v.tone === "warn" ? C.ochre : C.muted; const rij = (label, waarde, delta, eenheid) => React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "7px 0" } },
+                    React.createElement("span", { style: { fontSize: 12.5, color: C.muted } }, label),
+                    React.createElement("span", { style: { display: "flex", alignItems: "baseline", gap: 10 } },
+                        React.createElement("strong", { style: { fontSize: 17, fontWeight: 600 } }, waarde == null ? "\u2014" : `${nl(waarde)} ${eenheid}`),
+                        React.createElement("span", { style: { fontSize: 12.5, color: C.muted, minWidth: 54, textAlign: "right" } }, delta == null ? "\u2014" : `${delta > 0 ? "+" : ""}${nl(delta)}`))); return React.createElement("section", { style: ui.panel },
+                    React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 } },
+                        React.createElement("span", { style: { fontSize: 13, fontWeight: 600, color: C.bone } }, `${ph.name} \u00b7 week ${ph.week} van ${ph.weeks}`),
+                        React.createElement("span", { style: { fontSize: 11.5, color: C.muted } }, "sinds de start")),
+                    rij("Gewicht", pr.kg, pr.dKg, "kg"),
+                    rij("Taille", pr.waist, pr.dWa, "cm"),
+                    React.createElement("div", { style: { borderTop: `1px solid ${C.lineSoft}`, marginTop: 6, paddingTop: 9, fontSize: 12, color: kleur, lineHeight: 1.5 } }, v.text)); })(),
                 React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Weging toevoegen"),
                     React.createElement("label", { htmlFor: "bodyweight", style: ui.label }, "Lichaamsgewicht in kg"),
                     React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr auto", gap: 8 } },
                         React.createElement("input", { id: "bodyweight", inputMode: "decimal", value: kgInput, onChange: e => setKgInput(e.target.value), onKeyDown: e => e.key === "Enter" && addWeight(), placeholder: "88,5", style: ui.input }),
-                        React.createElement("button", { className: "tap", onClick: addWeight, style: ui.primary }, "Bewaren"))),
+                        React.createElement("button", { className: "tap", onClick: addWeight, style: ui.primary }, "Bewaren")),
+                    React.createElement("label", { htmlFor: "waist", style: { ...ui.label, marginTop: 14 } }, "Tailleomtrek in cm (1x per week)"),
+                    React.createElement("input", { id: "waist", inputMode: "decimal", value: waistInput, onChange: e => setWaistInput(e.target.value), onKeyDown: e => e.key === "Enter" && addWeight(), placeholder: "92,5", style: ui.input }),
+                    React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, margin: "8px 0 0" } }, "'s Ochtends nuchter, op navelhoogte, lint strak maar niet insnoerend. Een keer per week op dezelfde dag \u2014 vaker meten laat je vooral ruis zien.")),
                 weeklyAvgs.length ? React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone } }, "Weekgemiddelden"),
                     React.createElement("p", { style: { color: C.muted, fontSize: 12 } },
@@ -363,19 +414,19 @@ export default function Trainingslogboek() {
                             nl(weeklyAvgs[weeklyAvgs.length - 1].kg),
                             " kg"),
                         "."),
-                    weeklyAvgs.map(w => React.createElement("div", { key: w.key, style: { display: "flex", justifyContent: "space-between", padding: "9px 0", borderBottom: `1px solid ${C.lineSoft}` } },
-                        React.createElement("span", null,
+                    weeklyAvgs.slice().reverse().map((w, i, arr) => { const vorige = arr[i + 1]; const dw = vorige && w.kg != null && vorige.kg != null ? w.kg - vorige.kg : null; return React.createElement("div", { key: w.key, style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "9px 0", borderBottom: `1px solid ${C.lineSoft}` } },
+                        React.createElement("span", { style: { fontSize: 12.5, color: C.muted } },
                             "week van ",
                             w.week),
-                        React.createElement("strong", null,
-                            nl(w.kg),
-                            " kg")))) : React.createElement("section", { style: ui.panel }, "Nog geen gewichtstrend. Voeg minimaal twee metingen toe om het verloop te zien."),
+                        React.createElement("span", { style: { display: "flex", alignItems: "baseline", gap: 9 } },
+                            React.createElement("strong", { style: { fontWeight: 600 } }, [w.kg != null ? `${nl(w.kg)} kg` : null, w.waist != null ? `${nl(w.waist)} cm` : null].filter(Boolean).join(" \u00b7 ")),
+                            React.createElement("span", { style: { fontSize: 12, color: C.muted, minWidth: 42, textAlign: "right" } }, dw == null ? "" : `${dw > 0 ? "+" : ""}${nl(dw)}`))); })) : React.createElement("section", { style: ui.panel }, "Nog geen gewichtstrend. Voeg minimaal twee metingen toe om het verloop te zien."),
                 data.weights.length > 0 && React.createElement("section", { style: ui.panel },
                     React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Losse metingen"),
                     data.weights.slice(-10).reverse().map(w => React.createElement("div", { key: w.d, style: { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderBottom: `1px solid ${C.lineSoft}` } },
                         React.createElement("span", { style: { fontSize: 13, color: C.muted } }, fmt(w.d)),
                         React.createElement("span", { style: { display: "flex", alignItems: "center", gap: 4 } },
-                            React.createElement("strong", { style: { fontSize: 15, fontWeight: 600 } }, `${nl(w.kg)} kg`),
+                            React.createElement("strong", { style: { fontSize: 15, fontWeight: 600 } }, [w.kg != null ? `${nl(w.kg)} kg` : null, w.waist != null ? `${nl(w.waist)} cm` : null].filter(Boolean).join(" \u00b7 ")),
                             React.createElement("button", { className: "tap", "aria-label": `Verwijder meting van ${fmt(w.d)}`, onClick: () => patch(d => ({ ...d, weights: d.weights.filter(x => x.d !== w.d) })), style: { background: "none", border: 0, color: C.muted, minHeight: 44, minWidth: 44, fontSize: 16, cursor: "pointer" } }, "\u00d7")))),
                     React.createElement("p", { style: { fontSize: 11.5, color: C.muted, marginBottom: 0, marginTop: 10 } }, "Verkeerd ingevoerd? Tik op het kruisje. Een nieuwe meting op dezelfde dag overschrijft de oude.")),
                 data.weights.length > 1 && React.createElement("section", { style: ui.panel },
@@ -387,7 +438,17 @@ export default function Trainingslogboek() {
                             React.createElement(YAxis, { stroke: C.muted, domain: ["dataMin - 1.5", "dataMax + 1"] }),
                             React.createElement(Tooltip, null),
                             React.createElement(ReferenceLine, { y: data.settings.weightGoal, stroke: C.green }),
-                            React.createElement(Line, { type: "monotone", dataKey: "kg", stroke: C.ochre, strokeWidth: 3 }))))),
+                            React.createElement(Line, { type: "monotone", dataKey: "kg", stroke: C.ochre, strokeWidth: 3 })))),
+                data.weights.filter(w => typeof w.waist === "number").length > 1 && React.createElement("section", { style: ui.panel },
+                    React.createElement("h2", { style: { fontSize: 14, fontWeight: 600, letterSpacing: ".01em", color: C.bone, marginTop: 0 } }, "Taille"),
+                    React.createElement(ResponsiveContainer, { width: "100%", height: 190 },
+                        React.createElement(LineChart, { data: data.weights.filter(w => typeof w.waist === "number").map(w => ({ d: fmt(w.d), cm: w.waist })), margin: { top: 5, right: 8, left: -22, bottom: 0 } },
+                            React.createElement(CartesianGrid, { stroke: C.line, vertical: false }),
+                            React.createElement(XAxis, { dataKey: "d", stroke: C.muted, tick: { fontSize: 10 } }),
+                            React.createElement(YAxis, { stroke: C.muted, tick: { fontSize: 10 }, domain: ["dataMin - 2", "dataMax + 2"] }),
+                            React.createElement(Tooltip, { contentStyle: { background: C.cardHi, border: `1px solid ${C.line}`, borderRadius: 7, fontSize: 12 } }),
+                            React.createElement(Line, { type: "monotone", dataKey: "cm", stroke: C.ochre, strokeWidth: 2, dot: { r: 3, fill: C.ochre } }))),
+                    React.createElement("p", { style: { fontSize: 11.5, color: C.muted, lineHeight: 1.6, marginBottom: 0, marginTop: 8 } }, "In een opbouwfase is dit je belangrijkste lijn. Stijgt je gewicht terwijl deze vlak blijft, dan komt er spiermassa bij. Lopen ze samen omhoog, dan is je overschot te groot."))),
             tab === "slaap" && React.createElement(React.Fragment, null,
                 (() => { const w = sleepWeekNow(data.settings.sleepStart); if (!w)
                     return null; return React.createElement("section", { style: { ...ui.panel, paddingTop: 12, paddingBottom: 12 } },
