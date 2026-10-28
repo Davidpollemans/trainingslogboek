@@ -3,6 +3,9 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 const VERSION = 2;
 const KEY = "trainer:state";
 const LADDER = ["3x8", "4x8", "3x10", "4x10", "3x12", "4x12"];
+// Kleine spieren (schouder-zijkant, kuiten): groeien in herhalingen, niet in kilo's.
+const REP_LADDER = ["3x12", "4x12", "3x15", "4x15", "3x20", "4x20"];
+const ladderOf = item => (item && item.ladder) || LADDER;
 const C = { ink: "#191811", card: "#232118", cardHi: "#2C2A1F", line: "#35322A", lineSoft: "#2A281F", ochre: "#D9A231", ochreDim: "#6B5524", ochreBg: "#2E2716", bone: "#EDE8DA", muted: "#96907E", green: "#8DB567", red: "#D9786A" };
 const SESSIONS = {
     A: [
@@ -14,9 +17,9 @@ const SESSIONS = {
         { id: "sapd", name: "Straight arm pull down", group: "Brede rugspier", weight: 21, unit: "kg", rung: 3, rest: 60, cue: "Lats. Armen gestrekt, beweging uit je schouderbladen." },
         { id: "legcurl", name: "Leg curl", group: "Hamstrings", weight: 35, unit: "kg", rung: 0, rest: 60, cue: "Knie op het joint centre. Dijbeenpad strak boven je knieen." },
         { id: "triceps", name: "Triceps push down", group: "Triceps", weight: 24.5, unit: "kg", rung: 5, rest: 60 },
-        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
+        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, ladder: REP_LADDER, cue: "Ellebogen licht gebogen en leidend, stop op schouderhoogte. Rustig laten zakken, niet zwaaien. Groeit in herhalingen: pas na 4x20 een kilo erbij." },
         { id: "curl_a", name: "Biceps curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Ellebogen tegen je zij, geen zwaai." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, ladder: REP_LADDER, cue: "Seated calf. Hielen diep laten zakken en 1-2 sec onderin pauzeren, niet veren. Na falen nog 3-5 halve herhalingen onderin. Groeit in herhalingen; hiel bepaalt de grens." },
         { id: "plank", name: "Plank", group: "Rechte buikspieren", fixed: "3 x 40 sec", rest: 30 }
     ],
     B: [
@@ -26,11 +29,11 @@ const SESSIONS = {
         { id: "arnold", name: "Arnold press", group: "Schouders | Triceps", weight: 12, unit: "kg", rung: 2, rest: 90, cue: "3x10 eerst schoon afmaken." },
         { id: "row", name: "Horizontal row", group: "Bovenrug | Biceps", weight: 23.5, unit: "kg per kant", rung: 3, rest: 75, cue: "Machine met de twee losse grepen. Schouders naar voren laten komen bij het strekken, ellebogen achter je torso." },
         { id: "hipthrust", name: "45-graden rugextensie", group: "Bilspieren | Hamstrings | Onderrug", weight: 5, unit: "kg", rung: 0, rest: 90, cue: "Pad op het halve gaatje, nummer 8 zichtbaar. Schijf tegen je borst. Stop bij een rechte lijn." },
-        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, cue: "Ellebogen leiden, stop op schouderhoogte. Alleen schone herhalingen tellen." },
+        { id: "lateral", name: "Lateral raise", group: "Schouders", weight: 7, unit: "kg", rung: 0, rest: 45, ladder: REP_LADDER, cue: "Ellebogen licht gebogen en leidend, stop op schouderhoogte. Rustig laten zakken, niet zwaaien. Groeit in herhalingen: pas na 4x20 een kilo erbij." },
         { id: "curl", name: "Hammer curl", group: "Biceps", weight: 24.5, unit: "kg", rung: 0, rest: 60, cue: "Touw, duimen omhoog. Stop rond borsthoogte, niet dichtvouwen. Ellebogen tegen je zij." },
         { id: "fly", name: "Cable fly", group: "Borst", weight: 10, unit: "kg per kant", rung: 0, rest: 60, cue: "Nieuw. Lichte bocht in je ellebogen, die hoek blijft gelijk." },
         { id: "revfly", name: "Reverse fly", group: "Achterkant schouders", weight: 15, unit: "kg", rung: 0, rest: 45, cue: "Panatta rear delt machine. Kleinere uitslag: stop op een lijn met je romp. Bij pijn in je linkerschouder direct stoppen." },
-        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, cue: "Seated calf. Pad boven je knieen, hielen diep laten zakken." },
+        { id: "calf_b", name: "Calf raise", group: "Kuiten", weight: 40, unit: "kg", rung: 0, rest: 45, ladder: REP_LADDER, cue: "Seated calf. Hielen diep laten zakken en 1-2 sec onderin pauzeren, niet veren. Na falen nog 3-5 halve herhalingen onderin. Groeit in herhalingen; hiel bepaalt de grens." },
         { id: "crunch", name: "Crunch machine", group: "Rechte buikspieren", weight: 20, unit: "kg", rung: 0, rest: 45, cue: "Buigen vanuit je romp. Handen alleen ter plaatsing, niet aan trekken." },
     ]
 };
@@ -183,17 +186,17 @@ export default function Trainingslogboek() {
     const performed = SESSIONS[session].filter(i => completed[i.id]).length;
     const weeklyAvgs = useMemo(() => { const m = {}; data.weights.forEach(w => { const k = weekKey(new Date(`${w.d}T12:00:00`)); (m[k] || (m[k] = [])).push(w); }); const avg = (arr, f) => { const v = arr.map(f).filter(x => typeof x === "number" && !isNaN(x)); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; }; return Object.keys(m).sort().map(key => ({ key, week: fmt(key), kg: avg(m[key], e => e.kg), waist: avg(m[key], e => e.waist) })); }, [data.weights]);
     const weekBars = useMemo(() => Object.keys(data.weeks).sort().slice(-8).map(key => ({ week: fmt(key) + (data.weeks[key].away ? " \u2708" : ""), away: !!data.weeks[key].away, sport: data.weeks[key].away ? 0 : SLOTS.filter(s => s.gym && data.weeks[key][s.id]).length, vecht: data.weeks[key].away ? 0 : SLOTS.filter(s => !s.gym && data.weeks[key][s.id]).length })), [data.weeks]);
-    const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const def = { weight: item.weight, unit: item.unit, rung: item.rung }; const b = (data.baseline && data.baseline.exercises && data.baseline.exercises[item.id]) || current[item.id] || def; const n = current[item.id] || b || def; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${LADDER[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${LADDER[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * LADDER.length) }; }), [data.baseline, current]);
+    const progress = useMemo(() => allItems().filter(x => !x.fixed).map(item => { const def = { weight: item.weight, unit: item.unit, rung: item.rung }; const b = (data.baseline && data.baseline.exercises && data.baseline.exercises[item.id]) || current[item.id] || def; const n = current[item.id] || b || def; const cycles = n.weight != null && b.weight != null && n.weight > b.weight ? 1 : 0; return { name: item.name, from: `${nl(b.weight)} ${b.unit} | ${ladderOf(item)[b.rung]}`, to: `${nl(n.weight)} ${n.unit} | ${ladderOf(item)[n.rung]}`, moments: Math.max(0, n.rung - b.rung + cycles * ladderOf(item).length) }; }), [data.baseline, current]);
     const totalMoments = progress.reduce((a, p) => a + p.moments, 0);
     const weeksIn = Math.max(0, Math.floor((Date.now() - new Date(data.baseline.date).getTime()) / 6048e5));
     const setExercise = (id, values) => patch(d => ({ ...d, exercises: { ...d.exercises, [id]: { ...d.exercises[id], ...values } } }));
-    const snapOf = (item, src) => item.fixed ? { weight: null, unit: null, target: item.fixed } : { weight: src.weight, unit: src.unit, target: LADDER[src.rung] };
+    const snapOf = (item, src) => item.fixed ? { weight: null, unit: null, target: item.fixed } : { weight: src.weight, unit: src.unit, target: ladderOf(item)[src.rung] };
     const markExercise = (item, result, snap) => {
         setCompleted(c => ({ ...c, [item.id]: result }));
         setSnapshots(p => result ? ({ ...p, [item.id]: snap || snapOf(item, current[item.id] || {}) }) : (() => { const q = { ...p }; delete q[item.id]; return q; })());
     };
     const undoExercise = item => { const before = snapshots[item.id]; if (before && !item.fixed) {
-        const rung = LADDER.indexOf(before.target);
+        const rung = ladderOf(item).indexOf(before.target);
         setExercise(item.id, rung >= 0 ? { rung, weight: before.weight, unit: before.unit } : { weight: before.weight, unit: before.unit });
     } markExercise(item, null); setError(""); };
     const stayOnRung = item => { if (completed[item.id])
@@ -201,7 +204,7 @@ export default function Trainingslogboek() {
     const advance = item => { if (completed[item.id]) {
         setError("Deze oefening is al afgerond voor deze sessie.");
         return;
-    } const cur = current[item.id]; if (cur.rung === LADDER.length - 1) {
+    } const cur = current[item.id]; if (cur.rung === ladderOf(item).length - 1) {
         setNewWeightFor(item.id);
         setNewWeight("");
         return;
@@ -219,7 +222,7 @@ export default function Trainingslogboek() {
         const before = data;
         const now = new Date();
         const slot = DAY_TO_SLOT[now.getDay()];
-        const exercises = SESSIONS[session].map(item => { const snap = snapshots[item.id] || snapOf(item, current[item.id] || {}); const now2 = item.fixed ? null : current[item.id]; return ({ exerciseId: item.id, name: item.name, group: item.group, fixed: item.fixed || null, performedWeight: snap.weight, performedUnit: snap.unit, performedTarget: snap.target, result: completed[item.id], nextWeight: now2 ? now2.weight : null, nextTarget: now2 ? LADDER[now2.rung] : item.fixed }); });
+        const exercises = SESSIONS[session].map(item => { const snap = snapshots[item.id] || snapOf(item, current[item.id] || {}); const now2 = item.fixed ? null : current[item.id]; return ({ exerciseId: item.id, name: item.name, group: item.group, fixed: item.fixed || null, performedWeight: snap.weight, performedUnit: snap.unit, performedTarget: snap.target, result: completed[item.id], nextWeight: now2 ? now2.weight : null, nextTarget: now2 ? ladderOf(item)[now2.rung] : item.fixed }); });
         patch(d => ({ ...d, meta: { last: session, lastDate: now.toISOString() }, history: [...d.history, { id: crypto.randomUUID?.() || String(Date.now()), date: now.toISOString(), session, exercises }], weeks: { ...d.weeks, [weekKey(now)]: { ...(d.weeks[weekKey(now)] || {}), ...(slot ? { [slot]: true } : {}) } } }));
         setUndo(before);
         const ids = SESSIONS[session].map(x => x.id);
@@ -340,7 +343,7 @@ export default function Trainingslogboek() {
                             React.createElement("div", { style: { color: C.muted, fontSize: 12, margin: "7px 0 12px" } }, item.cue),
                             React.createElement("button", { className: "tap", onClick: () => done ? undoExercise(item) : markExercise(item, "completed"), style: done ? { ...ui.secondary, width: "100%", color: C.green, borderColor: C.green } : { ...ui.primary, width: "100%" } }, done ? "Gehaald \u2014 tik om te wijzigen" : "Markeer als afgerond")) : React.createElement(React.Fragment, null,
                             React.createElement("div", { style: { display: "flex", alignItems: "baseline", gap: 9, flexWrap: "wrap" } },
-                                React.createElement("strong", { style: { fontSize: 26, fontWeight: 600, letterSpacing: "-0.02em" } }, LADDER[st.rung]),
+                                React.createElement("strong", { style: { fontSize: 26, fontWeight: 600, letterSpacing: "-0.02em" } }, ladderOf(item)[st.rung]),
                                 React.createElement("span", { style: { color: C.line } }, "|"),
                                 React.createElement("label", { htmlFor: `weight-${item.id}`, style: { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" } }, `Gewicht voor ${item.name}`),
                                 React.createElement("input", { id: `weight-${item.id}`, inputMode: "decimal", value: st.weight ?? "", placeholder: "\u2014", onChange: e => setExercise(item.id, { weight: e.target.value }), onBlur: () => setExercise(item.id, { weight: parseNumber(st.weight) }), style: { ...ui.input, width: 76, minHeight: 44, padding: "6px 8px", fontSize: 17, background: "transparent", borderColor: C.line } }),
@@ -348,9 +351,9 @@ export default function Trainingslogboek() {
                                     React.createElement("option", { value: "kg" }, "kg"),
                                     React.createElement("option", { value: "kg per kant" }, "kg/kant"),
                                     React.createElement("option", { value: "machine" }, "machine"))),
-                            React.createElement("div", { style: { display: "flex", gap: 4, margin: "0 0 -4px" } }, LADDER.map((x, i) => React.createElement("button", { key: x, className: "tap", title: `Zet op ${x}`, "aria-label": `Zet ${item.name} op ${x}`, "aria-pressed": i === st.rung, onClick: () => setExercise(item.id, { rung: i }), style: { flex: 1, minHeight: 44, height: 44, padding: 0, border: 0, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" } }, React.createElement("span", { style: { width: "100%", height: 3, borderRadius: 2, background: i === st.rung ? C.ochre : i < st.rung ? C.ochreDim : C.line } })))),
+                            React.createElement("div", { style: { display: "flex", gap: 4, margin: "0 0 -4px" } }, ladderOf(item).map((x, i) => React.createElement("button", { key: x, className: "tap", title: `Zet op ${x}`, "aria-label": `Zet ${item.name} op ${x}`, "aria-pressed": i === st.rung, onClick: () => setExercise(item.id, { rung: i }), style: { flex: 1, minHeight: 44, height: 44, padding: 0, border: 0, background: "transparent", cursor: "pointer", display: "flex", alignItems: "center" } }, React.createElement("span", { style: { width: "100%", height: 3, borderRadius: 2, background: i === st.rung ? C.ochre : i < st.rung ? C.ochreDim : C.line } })))),
                             React.createElement("div", { style: { color: C.muted, fontSize: 11.5, lineHeight: 1.5, marginBottom: 12 } },
-                                `${LADDER[st.rung]} \u00b7 trede ${st.rung + 1} van ${LADDER.length} \u00b7 rust ${item.rest} sec`,
+                                `${ladderOf(item)[st.rung]} \u00b7 trede ${st.rung + 1} van ${ladderOf(item).length} \u00b7 rust ${item.rest} sec`,
                                 item.cue && ` \u00b7 ${item.cue.toLowerCase()}`),
                             newWeightFor === item.id ? React.createElement("div", { style: { background: C.cardHi, padding: 11, borderRadius: 8 } },
                                 React.createElement("label", { htmlFor: `new-${item.id}`, style: ui.label },
